@@ -1,2 +1,2 @@
 # MiniShell_SSOO
-Práctica en grupo de minishell 22/23
+Práctica de minishell 22/23

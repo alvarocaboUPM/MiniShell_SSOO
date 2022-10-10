@@ -51,6 +51,7 @@ Otras_Shells
 *.mod*
 *.cmd
 .tmp_versions/
+.vscode
 modules.order
 Module.symvers
 Mkfile.old

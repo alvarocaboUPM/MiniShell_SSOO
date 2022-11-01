@@ -149,11 +149,12 @@ int main(void)
 	bool in_pipe, isLast;
 	in_pipe=isLast=false;
 
+	//Si hay más de un comando se interpreta como un pipe
 	in_pipe= total_N_commands>1;
-	//DEBUG
-	
+
+	//================DEBUG=================
 	//printf("%d\n", (total_N_commands));
-	printIntArray(argcc);
+	//printIntArray(argcc);
 
 	int stdin_copy = dup(STDIN_FILENO);
 
@@ -161,7 +162,7 @@ int main(void)
 	while((command=argvv[current_N_commands])){
 		//Gestión básica de arguemtos y el comando
 		int n_args=argcc[current_N_commands+1] - 1; //Le quitamos el nombre del comando
-		fprintf(stderr, "#%d: \"%s\" using %d argument/s\n", current_N_commands, command[0], n_args);
+		//fprintf(stderr, "#%d: \"%s\" using %d argument/s\n", current_N_commands, command[0], n_args);
 		current_N_commands++; //current_N_commands <= argcc.length
 	
 		//Checks if a pipe has been requested, if so, it trys to create it
@@ -187,7 +188,7 @@ int main(void)
 					//Case: Pipe requested (ESCRITORES)
 					if(in_pipe){
 						if(!isLast)
-						puts("Using pipe");
+							//printf("Using pipe @ process %s -> : %d\n",command[0], getpid());
 						//Solo manejamos el fd en uso
 						if(inuse_fd!=0){
 							//try dup2(inuse_fd) -> Stdin
@@ -200,13 +201,15 @@ int main(void)
 						if (m_pipe[WRITE_END] != STDOUT_FILENO) {
                             if (!isLast && dup2(m_pipe[WRITE_END], STDOUT_FILENO) < 0) 
 							errorPrint("dup 2[HIJO] -> STDOUT");  // stdout -> pipe
-                        }
-						if (close(m_pipe[WRITE_END]) < 0) 
-							errorPrint("closing pipe on son inter_pipe[WRITE_END]");
+                        }	
 						if (inuse_fd != STDIN_FILENO && close(inuse_fd) < 0) 
 							errorPrint("closing last_pipe_fd when != STDIN_FILENO (0)");
+
+						//Tries para cerrar el pipe
+						if (close(m_pipe[WRITE_END]) < 0) 
+							errorPrint("Cerrando [WRITE_END] en HIJO");
 						if (close(m_pipe[READ_END]) < 0) 
-							errorPrint("closing pipe on son inter_pipe[READ_END]");
+							errorPrint("Cerrando [READ_END] en HIJO");
 					}
 
 					//Case: Normal execution
@@ -227,19 +230,19 @@ int main(void)
 					//Case: Pipe requested (LECTOR)
 					if(in_pipe){
 						if (close(inuse_fd) < 0) 
-							errorPrint("Cierra el pipe después de hacer fork"); /* close unused read end of the previous pipe */
+							errorPrint("Cerrando el [WRITE_END] no cerrado del hijo"); 
 						if (!isLast) {
 							inuse_fd = dup(m_pipe[READ_END]);
 						} else {
-							// restore stdin
+							// Reconfiguramos 
 							dup2(stdin_copy, STDIN_FILENO);
 							close(stdin_copy);
 						}
 						//try closing both ends
 						if (close(m_pipe[WRITE_END]) < 0) 
-							errorPrint("closing pipe on father inter_pipe[WRITE_END]");
+							errorPrint("Cerrando [WRITE_END] en padre");
 						if (close(m_pipe[READ_END]) < 0) 
-							errorPrint("closing pipe on father inter_pipe[READ_END]");
+							errorPrint("Cerrando [READ_END] en padre");
 					}
 					waitpid(pid, NULL, 0); //espera por su hijo
 				}

@@ -51,6 +51,7 @@
 //COLORES PARA EL PROMT
 #define RED   "\033[31m"
 #define GREEN "\033[32m"
+#define ORANGE "\033[33m"
 #define RESET "\033[0m"
 
 static pid_t PID; //Identificador de proceso
@@ -65,6 +66,9 @@ int* countArgs(char ***argvv, int argvc);
 void printWelcome();
 void PrintPromtCWD();
 void errorPrint(char* err);
+void warningPrint(char* err);
+void okPrint(char* err);
+
 //Internal functions
 int exeIC(char** argv, int argc);
 int cdIC(char** argv, int argc);
@@ -187,8 +191,12 @@ int main(void)
 				case   0 : 
 					//Case: Pipe requested (ESCRITORES)
 					if(in_pipe){
-						if(!isLast)
-							//printf("Using pipe @ process %s -> : %d\n",command[0], getpid());
+						if(!isLast){
+							char* mess= malloc(50);
+							sprintf(mess, "Using pipe @ process %s -> : %d\n",command[0], getpid());
+							warningPrint(mess);
+						}
+							
 						//Solo manejamos el fd en uso
 						if(inuse_fd!=0){
 							//try dup2(inuse_fd) -> Stdin
@@ -270,11 +278,29 @@ void printWelcome(){
 
 }
 /*
-	Escribe el error en rojo
+	Escribe el error en rojo utilizando perror
 */
 void errorPrint(char *err) {
 	fprintf(stderr, RED);
 	perror(err);
+	fprintf(stderr, RESET); 
+}
+
+/*
+	Escribe el warning en naranja
+*/
+void warningPrint(char *err) {
+	fprintf(stderr, ORANGE);
+	fprintf(stderr, "%s", err);
+	fprintf(stderr, RESET); 
+}
+
+/*
+	Escribe un texto en verde
+*/
+void okPrint(char *err) {
+	fprintf(stderr, GREEN);
+	fprintf(stderr, "%s", err);
 	fprintf(stderr, RESET); 
 }
 

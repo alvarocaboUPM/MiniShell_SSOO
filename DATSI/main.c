@@ -21,7 +21,7 @@
 /*========================================================
 * 				MINISHELL by Álvaro Cabo					
 *					Versión 2.0
-*					  30/10/2022
+*					  1/11/2022
 * ========================================================
 */
 
@@ -426,7 +426,7 @@ int umaskIC(char** argv, int argc){
 		umask(current_mask);        // change it back
 		fprintf(stdout, "%o\n", current_mask); 
 		break;
-	case 1:
+	case 1: ; //Solves a label error 
 		char* error;
 		new_mask = (mode_t)strtol(argv[1], &error, 8);
 		printf("%s", error);

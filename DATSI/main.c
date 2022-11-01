@@ -153,14 +153,14 @@ int main(void)
 	//DEBUG
 	
 	//printf("%d\n", (total_N_commands));
-	// printIntArray(argcc);
+	printIntArray(argcc);
 
 	int stdin_copy = dup(STDIN_FILENO);
 
 	//Presenting the input commands
 	while((command=argvv[current_N_commands])){
 		//Gestión básica de arguemtos y el comando
-		int n_args=argcc[current_N_commands] - 1; //Le quitamos el nombre del comando
+		int n_args=argcc[current_N_commands+1] - 1; //Le quitamos el nombre del comando
 		fprintf(stderr, "#%d: \"%s\" using %d argument/s\n", current_N_commands, command[0], n_args);
 		current_N_commands++; //current_N_commands <= argcc.length
 	

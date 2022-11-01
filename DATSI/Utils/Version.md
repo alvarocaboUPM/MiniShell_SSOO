@@ -19,7 +19,16 @@ obteniendo su PID del fork con su proceso padre, que les espera para morir
 
 - Se implementa exeIC(command, argc) para distinguir entre funciones internas y externas
 - Se crean distintas funciones para gestionar los distintos comandos internos:
-    - cd [YES]
-    - umask
+    - cd [OK]
+    - umask [YES] (20/10)
     - time
     - read
+
+## 1.1. Implementamos Redirs, Pipes y Background
+#### 20/10/22
+Objetivos de esta nueva versión es permitir que el usuario redireccione tanto la salida como la entrada estandar.
+Posteriormente, se intentará implementar pipes
+
+#### 29/10/22
+- Intento implementar pipes:
+    * A

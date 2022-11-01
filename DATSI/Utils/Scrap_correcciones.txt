@@ -1,0 +1,10 @@
+ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El fichero ".aux" se ha borrado.'
++ : 'No se controla adecuadamente el posible error devuelto'
++ : 'por la llamada al sistema OPEN.'
++ : 'El Minishell debe detectar y tolerar los errores derivados'
++ : 'de un uso incorrecto por parte del usuario y debe avisarle'
++ : 'del error para permitirle que lo corrija.'
++ :

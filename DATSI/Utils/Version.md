@@ -29,6 +29,8 @@ obteniendo su PID del fork con su proceso padre, que les espera para morir
 Objetivos de esta nueva versión es permitir que el usuario redireccione tanto la salida como la entrada estandar.
 Posteriormente, se intentará implementar pipes
 
-#### 29/10/22
+#### 31/10/22
 - Intento implementar pipes:
-    * A
+    * Completado
+- Se han quitado los warnings que lanzaba el compilador
+- Se ha solucionado un error de argumentos

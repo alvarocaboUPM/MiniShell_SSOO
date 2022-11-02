@@ -3,7 +3,7 @@
 + : '	 "Corrector de la práctica del Minishell. Versión 4.5.3"'
 + : '	 "Copyright © 1993-2020 Francisco Rosales «frosal@fi.upm.es»"'
 + :
-+ : '	 FECHA: "Wed Oct 12 15:00:06 CEST 2022"'
++ : '	 FECHA: "Tue Nov  1 18:00:01 CET 2022"'
 + : '	 GRUPO: "c200172"'
 + : '	 AUTORES: "c200172; alvaro.cabo@alumnos.upm.es; Álvaro Cabo Ciudad"'
 + :
@@ -106,68 +106,37 @@ make: 'sigdfl' is up to date.
 + :
 + make msh
 gcc -Wall -g   -c -o main.o main.c
-main.c:68:26: warning: initialization of 'const char **' from incompatible pointer type 'char *' [-Wincompatible-pointer-types]
-   68 | const char** ICommands ={"cd", "umask","time", "read"};
-      |                          ^~~~
-main.c:68:26: note: (near initialization for 'ICommands')
-main.c:68:32: warning: excess elements in scalar initializer
-   68 | const char** ICommands ={"cd", "umask","time", "read"};
-      |                                ^~~~~~~
-main.c:68:32: note: (near initialization for 'ICommands')
-main.c:68:40: warning: excess elements in scalar initializer
-   68 | const char** ICommands ={"cd", "umask","time", "read"};
-      |                                        ^~~~~~
-main.c:68:40: note: (near initialization for 'ICommands')
-main.c:68:48: warning: excess elements in scalar initializer
-   68 | const char** ICommands ={"cd", "umask","time", "read"};
-      |                                                ^~~~~~
-main.c:68:48: note: (near initialization for 'ICommands')
-main.c:75:11: warning: initialization of 'void (*)(char **, int)' from incompatible pointer type 'int (*)(char **, int)' [-Wincompatible-pointer-types]
-   75 |   { "cd", cdIC },
-      |           ^~~~
-main.c:75:11: note: (near initialization for 'function_map[0].func')
-main.c:76:13: warning: initialization of 'void (*)(char **, int)' from incompatible pointer type 'int (*)(char **, int)' [-Wincompatible-pointer-types]
-   76 |   { "time", timeIC },
-      |             ^~~~~~
-main.c:76:13: note: (near initialization for 'function_map[1].func')
-main.c:77:14: warning: initialization of 'void (*)(char **, int)' from incompatible pointer type 'int (*)(char **, int)' [-Wincompatible-pointer-types]
-   77 |   { "umask", umaskIC },
-      |              ^~~~~~~
-main.c:77:14: note: (near initialization for 'function_map[2].func')
-main.c:78:13: warning: initialization of 'void (*)(char **, int)' from incompatible pointer type 'int (*)(char **, int)' [-Wincompatible-pointer-types]
-   78 |   { "read", readIC },
-      |             ^~~~~~
-main.c:78:13: note: (near initialization for 'function_map[3].func')
 main.c: In function 'main':
-main.c:101:32: warning: multi-line comment [-Wcomment]
-  101 |     signal(SIGQUIT, SIG_IGN);  // Ctrl+shitft+\
+main.c:120:32: warning: multi-line comment [-Wcomment]
+  120 |     signal(SIGQUIT, SIG_IGN);  // Ctrl+shitft+\
       |                                ^
-main.c:135:8: warning: implicit declaration of function 'exeIC' [-Wimplicit-function-declaration]
-  135 |    if (exeIC(command, n_args) == -1){
-      |        ^~~~~
-main.c:138:32: warning: implicit declaration of function 'printError' [-Wimplicit-function-declaration]
-  138 |                     case - 1 : printError("fork de mandato"); exit(1);
-      |                                ^~~~~~~~~~
-main.c:91:6: warning: unused variable 'argc' [-Wunused-variable]
-   91 |  int argc;
+main.c:114:6: warning: unused variable 'bg_Pid' [-Wunused-variable]
+  114 |  int bg_Pid = 0; //PID de la función de bg
+      |      ^~~~~~
+main.c:109:6: warning: unused variable 'argc' [-Wunused-variable]
+  109 |  int argc;
       |      ^~~~
-main.c:90:9: warning: unused variable 'argv' [-Wunused-variable]
-   90 |  char **argv = NULL;
+main.c:108:9: warning: unused variable 'argv' [-Wunused-variable]
+  108 |  char **argv = NULL;
       |         ^~~~
-main.c: At top level:
-main.c:196:6: warning: conflicting types for 'printError'
-  196 | void printError(char *error) {
-      |      ^~~~~~~~~~
-main.c:138:32: note: previous implicit declaration of 'printError' was here
-  138 |                     case - 1 : printError("fork de mandato"); exit(1);
-      |                                ^~~~~~~~~~
+main.c: In function 'printIntArray':
+main.c:460:24: warning: division 'sizeof (int *) / sizeof (int)' does not compute the number of array elements [-Wsizeof-pointer-div]
+  460 |  for(i=0; i<sizeof(arr)/sizeof(int); i++){
+      |                        ^
+main.c:455:25: note: first 'sizeof' operand was declared here
+  455 | void printIntArray(int *arr){
+      |                    ~~~~~^~~
 main.c: In function 'cdIC':
-main.c:270:1: warning: control reaches end of non-void function [-Wreturn-type]
-  270 | }
+main.c:413:1: warning: control reaches end of non-void function [-Wreturn-type]
+  413 | }
+      | ^
+main.c: In function 'umaskIC':
+main.c:446:1: warning: control reaches end of non-void function [-Wreturn-type]
+  446 | }
       | ^
 At top level:
-main.c:54:14: warning: 'HOME' defined but not used [-Wunused-variable]
-   54 | static char* HOME; //Path del home
+main.c:59:14: warning: 'HOME' defined but not used [-Wunused-variable]
+   59 | static char* HOME; //Path del home
       |              ^~~~
 gcc -Wall -g  -o msh parser.o scanner.o main.o
 + : Bien.
@@ -183,9 +152,17 @@ gcc -Wall -g  -o msh parser.o scanner.o main.o
 + : 'Su Minishell debe aceptar líneas en blanco y mandatos simples'
 + : 'y debe terminar limpiamente cuando se cierre su entrada estándar.'
 + :
-+ MSHPID=2808429
++ MSHPID=1871988
 + ./msh
-+ wait 2808429
++ wait 1871988
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ __   __   _______ ___    __   __ _______ ______   _______ 
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 
 
@@ -196,7 +173,6 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 		 
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /usr/bin/env
-#0: "/usr/bin/env" using 0 argument/s
 PWD=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 WHO=c200172
@@ -206,15 +182,12 @@ PATH=/bin:/usr/bin:/usr/local/bin:.
 _=./msh
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/echo
-#0: "/bin/echo" using 0 argument/s
 
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ../../../../../../../../../../bin/echo
-#0: "../../../../../../../../../../bin/echo" using 0 argument/s
 
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./:
-#0: "./:" using 0 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 
 
@@ -232,10 +205,18 @@ You hitted ctrl-D | bye!
 + :
 + rm -f .pipe
 + mkfifo .pipe
-+ MSHPID=2808438
++ MSHPID=1871997
 + exec
 + exec ./sigdfl ./msh
 + rm -f .pipe
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ __   __   _______ ___    __   __ _______ ______   _______ 
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + LEVEL=5
@@ -245,13 +226,10 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + : 'Se ejecutan mandatos, que están en el PATH, sin argumentos.'
 + :
 ./:
-#0: "./:" using 0 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ :
-#0: ":" using 0 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo
-#0: "echo" using 0 argument/s
 
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
@@ -266,54 +244,40 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + : '	el Minishell y el Corrector que le inyecta mandatos.'
 + : '		IGNÓRELO'
 + Sincronizar
-/bin/kill -KILL 2808444
-#0: "/bin/kill" using 2 argument/s
+/bin/kill -KILL 1872012
 + Sincronizar
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ rm -f .aux
-#0: "rm" using 2 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ touch .aux
-#0: "touch" using 1 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ :
-#0: ":" using 0 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : El mandato "touch" debe haber creado el fichero ".aux".
-#0: ":" using 9 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Veamos si existe, usando ls.
-#0: ":" using 5 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ :
-#0: ":" using 0 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l -a -1 -F -g -q -s .aux
-#0: "ls" using 8 argument/s
-0 -rw-rw-rw- 1 jail 0 Oct 12 15:00 .aux
+0 -rw-rw-rw- 1 jail 0 Nov  1 18:00 .aux
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ :
-#0: ":" using 0 argument/s
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808447
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872015
 + '[' -f .aux ']'
 + : 'Cierto. Bien.'
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + Sincronizar
 : Ahora lo borramos.
-#0: ":" using 3 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ rm -f .aux
-#0: "rm" using 2 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
-#0: "ls" using 2 argument/s
 ls: cannot access '.aux': No such file or directory
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808457
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872024
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 
@@ -326,44 +290,43 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + rm -f .aux
 + :
 + : '«««   Se deben cerrar los que NO se vayan a usar.   »»»'
 + :
-
-#0: "./freefds" using 0 argument/s
-1019
++ Sincronizar
+./freefds
+1001
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./freefds
-#0: "./freefds" using 0 argument/s
-1019
+1000
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./freefds .ddf
-#0: "./freefds" using 1 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .ddf
-#0: "cat" using 1 argument/s
-1019
+999
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./freefds
-#0: "./freefds" using 0 argument/s
-1019
+997
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./freefds
-#0: "./freefds" using 0 argument/s
-1019
+996
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./freefds .aux
-#0: "./freefds" using 1 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .aux
-#0: "cat" using 1 argument/s
-1019
+995
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cmp .ddf .aux
-#0: "cmp" using 2 argument/s
+.ddf .aux differ: char 3, line 1
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808463
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872031
 + cmp -s .ddf .aux
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : 'Cierto. Bien.'
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
++ ERROR_GRAVE
++ NOTA=5
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El numero de descriptores usados NO se mantiene estable.'
++ : 'Esto puede suponer a la larga, la ejecución anómala del'
++ : Minishell.
 + rm -f .aux
 + :
 + LEVEL=10
@@ -374,22 +337,18 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : 'Cierto. Bien.'
 + :
 + Sincronizar
 last -n 10 c200172 > .aux
-#0: "last" using 3 argument/s
 
 wtmp begins Thu Sep 22 01:00:32 2022
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .aux
-#0: "cat" using 1 argument/s
 cat: .aux: No such file or directory
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808475
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872045
 + '[' -f .aux ']'
 + : Falso.
 + ERROR_GRAVE
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + NOTA=10
-+ : '########## ATENCIÓN ##########'
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : '########## ATENCIÓN ##########'
 + :
 + : 'El fichero ".aux" NO se ha creado.'
 + : 'Utilice la llamada al sistema CREAT.'
@@ -398,19 +357,15 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + NOTA=10
 + :
 + : '«««   Se debe truncar el fichero.   »»»'
 + :
-+ Sincronizar
 touch .void
-#0: "touch" using 1 argument/s
++ Sincronizar
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .void > .aux
-#0: "cat" using 1 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cmp .void .aux
-#0: "cmp" using 2 argument/s
 cmp: .aux: No such file or directory
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808480
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872049
 + cmp -s .void .aux
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
@@ -428,41 +383,31 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
 + : '«««   Se debe abortar la ejecución del resto de la linea.  »»»'
 + :
 touch .aux
-#0: "touch" using 1 argument/s
 + Sincronizar
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ rm -f .aux2
-#0: "rm" using 2 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ rm -f .noexiste
-#0: "rm" using 2 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux .aux2 .noexiste
-#0: "ls" using 4 argument/s
 ls: cannot access '.aux2': No such file or directory
 ls: cannot access '.noexiste': No such file or directory
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : NO debería borrarse el fichero ".aux".
-#0: ":" using 6 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería crearse el fichero ".aux2".
-#0: ":" using 5 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ rm -f .aux < .noexiste
-#0: "rm" using 2 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ touch .aux2
-#0: "touch" using 1 argument/s
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux .aux2 .noexiste
-#0: "ls" using 4 argument/s
 ls: cannot access '.aux': No such file or directory
 ls: cannot access '.noexiste': No such file or directory
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux2
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux2
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808487
-#0: "/bin/kill" using 2 argument/s
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872056
 + '[' -f .aux2 ']'
 + : 'Cierto. Bien.'
 
@@ -484,17 +429,14 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + rm -f .aux2
 + :
 + : '«««   Se debe abrir para lectura.   »»»'
 + :
-touch+ Sincronizar
- .aux
-#0: "touch" using 1 argument/s
+touch .aux+ Sincronizar
+
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo rm .aux > .doit
-#0: "echo" using 2 argument/s
 rm .aux
 
 jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ sh < .doit
-#0: "sh" using 0 argument/s
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
 + '[' -f .aux ']'
 + : Cierto.
 + ERROR_GRAVE
@@ -522,11 +464,18 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ sh < .doit
 + : '«««   Se deben cerrar los que NO se usen.   »»»'
 + :
 + Sincronizar
-1019
-1019
-1019
+972
+972
+972
+.ddf .aux differ: char 2, line 1
 + cmp -s .ddf .aux
-+ : 'Cierto. Bien.'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El numero de descriptores usados NO se mantiene estable.'
++ : 'Compruebe que al redirigir entradas y salidas se cierran'
++ : 'los descriptores que NO se usan.'
 + rm -f .aux
 + :
 + LEVEL=20
@@ -536,9 +485,9 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ sh < .doit
 + : '«««   Se debe esperar por el último mandato.   »»»'
 + :
 + cron_ON
-+ CLOCK=54007
++ CLOCK=64803
 + Sincronizar
-kill: (2808528): No such process
+kill: (1872097): No such process
 + TIMEOUT
 + : '########## ATENCIÓN ##########'
 + : 'Posible bloqueo (1) del Minishell.'
@@ -558,8 +507,8 @@ kill: (2808528): No such process
 + : '«««   Se debe conectar salida con entrada del siguiente.   »»»'
 + :
 + Sincronizar
-kill: (2808543): No such process
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+kill: (1872110): No such process
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
 ls: cannot access '.aux': No such file or directory
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
@@ -569,11 +518,18 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Se deben cerrar los que NO se usen.   »»»'
 + :
 + Sincronizar
-1019
-1019
-1019
+972
+972
+972
+.ddf .aux differ: char 2, line 1
 + cmp -s .ddf .aux
-+ : 'Cierto. Bien.'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El numero de descriptores usados NO se mantiene estable.'
++ : 'Compruebe que al generar secuencias se cierran los'
++ : 'descriptores que NO se usan.'
 + rm -f .aux
 + :
 + LEVEL=25
@@ -584,8 +540,8 @@ ls: cannot access '.aux': No such file or directory
 + :
 + Sincronizar
 rm: cannot remove '.ls1': No such file or directory
--rw-rw-rw- 1 jail jail 185 Oct 12 15:00 .aux
--rw-rw-rw- 1 jail jail 185 Oct 12 15:00 .ls1
+-rw-rw-rw- 1 jail jail 185 Nov  1 18:00 .aux
+-rw-rw-rw- 1 jail jail 185 Nov  1 18:00 .ls1
 + cmp -s .aux .ls1
 + : 'Cierto. Bien.'
 + rm -f .aux .ls1
@@ -618,8 +574,7 @@ sh: 1: xua.: not found
 + : '«««   mandato y la salida del último.           »»»'
 + :
 + Sincronizar
-rev: stdin: 6: Invalid or incomplete multibyte or wide character
-ls: cannot access '.aux': No such file or directory
+rev: stdin: 7: Invalid or incomplete multibyte or wide character
 ls: cannot access '.aux': No such file or directory
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
@@ -643,11 +598,18 @@ cat: .out: No such file or directory
 + : '«««   Se deben cerrar los que NO se usen.   »»»'
 + :
 + Sincronizar
-1019
-1019
-1019
+972
+972
+972
+.ddf .aux differ: char 2, line 1
 + cmp -s .ddf .aux
-+ : 'Cierto. Bien.'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El numero de descriptores usados NO se mantiene estable.'
++ : 'Compruebe que al generar secuencias se cierran los'
++ : 'descriptores que NO se usan.'
 + rm -f .aux
 + rm -f .ddf
 + :
@@ -658,7 +620,7 @@ cat: .out: No such file or directory
 + : '«««   Se deben ejecutar correctamente.   »»»'
 + :
 + Sincronizar
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
 + Sincronizar
 ls: cannot access '.aux': No such file or directory
 + '[' -f .aux ']'
@@ -669,7 +631,7 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   No se debe esperar por ellos.   »»»'
 + :
 + cron_ON
-+ CLOCK=54028
++ CLOCK=64824
 + Sincronizar
 ++ cron_OFF
 + '[' 0 -lt 5 ']'
@@ -680,7 +642,7 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Se debe esperar por el mandato en foreground.   »»»'
 + :
 + Sincronizar
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
 sleep 1
 ls: cannot access '.aux': No such file or directory
 + '[' -f .aux ']'
@@ -697,19 +659,21 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Deben ser ignoradas o capturadas por el Minishell.   »»»'
 + :
 + : 'Se arranca otro Minishell con el siguiente PID:'
-+ PID=2808687
++ PID=1872255
 + ./sigdfl ./msh
 + Sincronizar
+sh: 77: __: not found
+sh: 78: Syntax error: "|" unexpected
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 2808688
-#0: "/bin/kill" using 2 argument/s
-+ : 'Se intenta matar con las señales INT, QUIT y KILL en ese orden.'
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872256
 
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + kill -INT 2808687
-+ kill -QUIT 2808687
-+ kill -KILL 2808687
-+ wait 2808687
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1448: 2808687 Killed                  ./sigdfl $BIN < $PIPE
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : 'Se intenta matar con las señales INT, QUIT y KILL en ese orden.'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + kill -INT 1872255
++ kill -QUIT 1872255
++ kill -KILL 1872255
++ wait 1872255
+/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1448: 1872255 Killed                  ./sigdfl $BIN < $PIPE
 + EXIT=137
 + case $EXIT in
 + : 137
@@ -719,24 +683,56 @@ jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + kill -INT 2808687
 + :
 + : '«««   Deben ser ignoradas por los procesos en background.   »»»'
 + :
-+ Sincronizar
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
-+ Sincronizar
+touch + Sincronizar
+.aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./killmyself -INT &
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./killmyself -INT &
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./killmyself -INT &
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872259
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería+ Sincronizar
+ borrarse el fichero ".aux".
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
 ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872267
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
-+ :
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + Senyales_III ___________________________________________________________
 + :
 + : '«««   Deben ser la acción por defecto para procesos en foreground.   »»»'
 + :
+touch .aux
 + Sincronizar
--rw-rw-rw- 1 jail jail 0 Oct 12 15:00 .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+-rw-rw-rw- 1 jail jail 0 Nov  1 18:00 .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : NO debería borrarse el fichero ".aux".
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ./killmyself -INT
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
 ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872271
 + '[' -f .aux ']'
 + : Falso.
 + ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : '########## ATENCIÓN ##########'
 + :
 + : 'El fichero ".aux" se ha borrado.'
 + : 'SIGINT y SIGQUIT no tienen la acción por defecto para los'
@@ -749,15 +745,46 @@ ls: cannot access '.aux': No such file or directory
 + : 'Cuando se invoca en foreground y es el último:'
 + : '«««   Se debe ejecutar como llamada al sistema.   »»»'
 + :
-/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+pwd
 + Sincronizar
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd ..
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cd c200172
 /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
-++ cd ..
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd ./..
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ pwd
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
+cat: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872278
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ cd ..
 ++ pwd
 ++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
-+ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13 = /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13 ']'
-+ : 'Cierto. Bien.'
+cat: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd: No such file or directory
++ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13 = '' ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'No se obtiene el resultado esperado.'
++ : 'Compruebe que NO se ejecuta en un subshell,'
++ : 'esto es, que NO se hace FORK, sino que se llama'
++ : 'directamente a chdir.'
 + :
 + Interno_cd_II __________________________________________________________
 + :
@@ -765,10 +792,26 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Debe mostrar el "current working directory"   »»»'
 + : '«««   por la salida estándar con formato "%s\n".    »»»'
 + :
+cd ..
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
-cmp: EOF on /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd which is empty
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cd . > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cat: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cmp /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cmp: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872286
 + cmp -s /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
-+ : Falso.
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
 + ERROR_GRAVE
 + : '########## ATENCIÓN ##########'
 + :
@@ -781,11 +824,32 @@ cmp: EOF on /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd which i
 + : 'Cuando se invoca "cd" sin argumentos:'
 + : '«««   Debe cambiar al directorio HOME.   »»»'
 + :
-+ Sincronizar
+cd ..
 /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
-+ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 = /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 ']'
-+ : 'Cierto. Bien.'
++ Sincronizar
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13$ cd
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+cat: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872292
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+cat: /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home: No such file or directory
++ '[' '' = /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'Cuando "cd" no recibe argumento, debería pasar al HOME.'
 + rm -f .home
 + :
 + Interno_cd_IV __________________________________________________________
@@ -794,13 +858,23 @@ cmp: EOF on /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd which i
 + : '«««   Se debe notificar el error.   »»»'
 + :
 + Sincronizar
-sh: 115: cd: can't cd to ...
+cd ...
+[31mCan't access directory: No such file or directory
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872299
 + :
 + : 'Si se invoca con demasiados argumentos:'
 + : '«««   Se debe notificar el error.   »»»'
 + :
-+ Sincronizar
-sh: 117: cd: can't cd to a
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd+ Sincronizar
+ a b
+[31mCant have more than 1 argument for 'CD': Success
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872301
 + :
 + LEVEL=45
 + :
@@ -810,12 +884,29 @@ sh: 117: cd: can't cd to a
 + : '«««   Se debe mostrar la mascara de creación de ficheros,   »»»'
 + : '«««   por la salida estándar con formato "%o\n".            »»»'
 + :
-+ Sincronizar
-0000
-0000
-++ cat .aux
-+ '[' 0000 -eq 0 ']'
-+ : 'Cierto. Bien.'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ umask+ Sincronizar
+
+0
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ umask > .aux
+0
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .aux
+cat: .aux: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872303
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ cat .aux
+cat: .aux: No such file or directory
++ '[' '' -eq 0 ']'
+/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1673: [: : integer expression expected
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'Debe poderse redirigir la salida y/o entrada estándar'
++ : 'de los mandatos especiales.'
 + rm -f .aux
 + :
 + Interno_umask_II _______________________________________________________
@@ -823,19 +914,47 @@ sh: 117: cd: can't cd to a
 + : 'Cuando se invoca "umask" sin argumentos:'
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
-+ Sincronizar
--rw-rw-rw- 1 jail jail 5 Oct 12 15:00 .aux
-++ ls -l .aux
+umask+ Sincronizar
+ > .aux
+0
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería crearse con permisos "rw-rw-rw-"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872309
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ ls -l .aux
 ++ cut -c-10
-+ '[' -rw-rw-rw- = -rw-rw-rw- ']'
-+ : 'Cierto. Bien.'
+ls: cannot access '.aux': No such file or directory
++ '[' '' = -rw-rw-rw- ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'Compruebe que si "umask" no recibe argumento, no modifica'
++ : 'el valor que tenia.'
 + :
 + Sincronizar
--rwxrwxrwx 1 jail jail 5 Oct 12 15:00 .aux
-++ ls -l .aux
+chmod +x .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "rwxrwxrwx"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872316
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ ls -l .aux
 ++ cut -c-10
-+ '[' -rwxrwxrwx = -rwxrwxrwx ']'
-+ : 'Cierto. Bien.'
+ls: cannot access '.aux': No such file or directory
++ '[' '' = -rwxrwxrwx ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
 + :
 + Interno_umask_III ______________________________________________________
 + :
@@ -843,13 +962,38 @@ sh: 117: cd: can't cd to a
 + : '«««   Se debe modificar el valor actual de la mascara      »»»'
 + : '«««   con el valor del argumento interpretado en base 8.   »»»'
 + :
+chmod 0 .aux
 + Sincronizar
----------- 1 jail jail 5 Oct 12 15:00 .aux
--rwxr-x--x 1 jail jail 5 Oct 12 15:00 .aux
-++ ls -l .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "---------"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ umask 026
+26
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ chmod +rwx .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "rwxr-x--x"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872324
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ ls -l .aux
 ++ cut -c-10
-+ '[' -rwxr-x--x = -rwxr-x--x ']'
-+ : 'Cierto. Bien.'
+ls: cannot access '.aux': No such file or directory
++ '[' '' = -rwxr-x--x ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'Compruebe la correcta interpretación del argumento'
++ : 'como un numero en octal.'
 + :
 + Interno_umask_IV _______________________________________________________
 + :
@@ -857,14 +1001,38 @@ sh: 117: cd: can't cd to a
 + : '«««   Se debe notificar el error.                           »»»'
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
+chmod 0 .aux
 + Sincronizar
----------- 1 jail jail 5 Oct 12 15:00 .aux
-sh: 143: umask: Illegal number: 888
--rwxr-x--x 1 jail jail 5 Oct 12 15:00 .aux
-++ ls -l .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "---------"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ umask 888
+888[31mPlease imput a valid Base-8 number: Success
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ chmod +rwx .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "rwxr-x--x"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872337
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ ls -l .aux
 ++ cut -c-10
-+ '[' -rwxr-x--x = -rwxr-x--x ']'
-+ : 'Cierto. Bien.'
+ls: cannot access '.aux': No such file or directory
++ '[' '' = -rwxr-x--x ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'En caso de interpretación incorrecta del argumento'
++ : 'como un numero en octal, notifique el error.'
 + :
 + Interno_umask_V ________________________________________________________
 + :
@@ -873,11 +1041,31 @@ sh: 143: umask: Illegal number: 888
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
 + Sincronizar
----------- 1 jail jail 5 Oct 12 15:00 .aux
--rw-rw--w- 1 jail jail 5 Oct 12 15:00 .aux
-++ ls -l .aux
+chmod 0 .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "---------"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ umask 115 0
+[31mCant have more than 1 argument for 'Umask': Success
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ chmod +rwx .aux
+chmod: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería cambiarse a permisos "rwxr-x--x"
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872348
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ ls -l .aux
 ++ cut -c-10
-+ '[' -rw-rw--w- = -rwxr-x--x ']'
+ls: cannot access '.aux': No such file or directory
++ '[' '' = -rwxr-x--x ']'
 + : Falso.
 + ERROR_GRAVE
 + : '########## ATENCIÓN ##########'
@@ -895,12 +1083,17 @@ sh: 143: umask: Illegal number: 888
 + : '«««   de todo mandato interno. También de "time".   »»»'
 + :
 + Sincronizar
-sh: 156: time: not found
--rw-rw--w- 1 jail jail 0 Oct 12 15:00 .aux
+time sleep 0 > .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872360
 + '[' -s .aux ']'
 + : Falso.
 + ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : '########## ATENCIÓN ##########'
 + :
 + : 'No se puede redirigir su salida estándar.'
 + rm -f .aux
@@ -913,8 +1106,14 @@ sh: 156: time: not found
 + : '«««   Se debe notificar el tiempo consumido.   »»»'
 + :
 + Sincronizar
-sh: 159: time: not found
-sh: 160: time: not found
+time
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ time > .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .aux
+cat: .aux: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872364
 + '[' -s .aux ']'
 + : Falso.
 + ERROR_GRAVE
@@ -922,20 +1121,28 @@ sh: 160: time: not found
 + :
 + : 'No se puede redirigir su salida estándar.'
 + rm -f .aux
-+ :
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + :
 + Interno_time_III _______________________________________________________
 + :
 + : 'Cuando se invoca "time" con argumentos:'
 + : '«««   Se debe ejecutar el mandato indicado.                    »»»'
 + : '«««   Se debe notificar el tiempo consumido en su ejecución.   »»»'
 + :
-+ Sincronizar
-sh: 164: time: not found
--rw-rw--w- 1 jail jail 0 Oct 12 15:00 .aux
+touch+ Sincronizar
+ .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ time rm -f .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
+-rw-r----- 1 jail jail 0 Nov  1 18:00 .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872369
 + '[' -f .aux ']'
 + : Cierto.
 + ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : '########## ATENCIÓN ##########'
 + :
 + : 'No ejecuta correctamente el mandato.'
 + rm -f .aux
@@ -947,10 +1154,26 @@ sh: 164: time: not found
 + : 'El metacarácter "$" con argumento "HOME" :'
 + : '«««   Se debe sustituir por el valor de la variable "HOME".   »»»'
 + :
-+ Sincronizar
+: + Sincronizar
+HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
 /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $HOME
+$HOME
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $HOME > .aux
+$HOME
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872374
 + cmp -s .aux .home
-+ : 'Cierto. Bien.'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El metacarácter "$" NO se sustituye correctamente.'
 + rm -f .aux .home
 + :
 + Metacaracter_Dolar_II __________________________________________________
@@ -958,11 +1181,24 @@ sh: 164: time: not found
 + : 'Donde aparezca el metacarácter "$" con argumento:'
 + : '«««   Se debe sustituir correctamente la variable por su valor.   »»»'
 + :
-+ echo /../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
+echo+ echo /../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
+ /..$HOME/. > .aux
 + Sincronizar
-/../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
+/..$HOME/.
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cat .aux
+cat: .aux: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872382
 + cmp .aux .aux2
-+ : 'Cierto. Bien.'
+cmp: .aux: No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El nombre de la variable comienza tras el metacarácter "$"'
++ : 'y es aquel que casa con el formato "%[_a-zA-Z0-9]"'
 + rm -f .aux .aux2
 + :
 + LEVEL=65
@@ -972,11 +1208,25 @@ sh: 164: time: not found
 + : 'El metacarácter "~" sin argumento:'
 + : '«««   Se debe sustituir por el valor de la variable "HOME".   »»»'
 + :
+: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
 /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-++ cat .home
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo ~
+~
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo ~ > .aux
+~
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872388
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ++ cat .home
+cat: .home: No such file or directory
 ++ cat .aux
-+ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 = /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 ']'
+cat: .aux: No such file or directory
++ '[' '' = '' ']'
 + : 'Cierto. Bien.'
 + rm -f .aux .home
 + :
@@ -985,10 +1235,25 @@ sh: 164: time: not found
 + : 'El mandato "cd ." :'
 + : '«««   Debe mostrar el valor de la variable "HOME".   »»»'
 + :
-/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
+: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $HOME
+$HOME
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $HOME > .home
+$HOME
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd .
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ cd . > .aux
+/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872397
 + cmp -s .aux .home
-+ : Falso.
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : Falso.
 + ERROR_GRAVE
 + : '########## ATENCIÓN ##########'
 + :
@@ -1002,14 +1267,32 @@ sh: 164: time: not found
 + : 'Cuando se invoca "read" con argumentos:'
 + : '«««   Se debe leer una sola línea de la entrada estándar.   »»»'
 + :
-+ Sincronizar
-: Debería crearse el fichero .out
--rw-rw--w- 1 jail jail 0 Oct 12 15:00 .out
--rw-rw--w- 1 jail jail 0 Oct 12 15:00 .out2
+: + Sincronizar
+La línea siguiente al "read" es: touch .out2
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ read CMD ARG
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ touch .out2
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ touch .out
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $CMD $ARG
+$CMD $ARG
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería crearse el fichero .out
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : NO debería crearse el fichero .out2
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .out .out2
+-rw-r----- 1 jail jail 0 Nov  1 18:00 .out
+-rw-r----- 1 jail jail 0 Nov  1 18:00 .out2
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872404
 + '[' -f .out ']'
 + : Cierto.
 + rm -f .out
-+ '[' -f .out2 ']'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + '[' -f .out2 ']'
 + : Cierto.
 + ERROR_GRAVE
 + : '########## ATENCIÓN ##########'
@@ -1023,15 +1306,31 @@ sh: 164: time: not found
 + : 'Cuando se invoca "read" con argumentos:'
 + : '«««   Se debe asignar valor a las variables indicadas.   »»»'
 + :
-+ Sincronizar
-sh: 196: .aux: not found
-/bin/kill -KILL 2808812
-sh: 198: -KILL: not found
+:+ Sincronizar
+ La línea siguiente al "read" es: .aux touch
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ read ARG CMD
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ .aux touch
+[31m'.aux' exited, status(-1): No such file or directory
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo $ARG $CMD
+$ARG $CMD
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ $CMD $ARG
+[31m'$CMD' exited, status(-1): No such file or directory
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : Debería crearse el fichero ".aux".
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ ls -l .aux
 ls: cannot access '.aux': No such file or directory
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ /bin/kill -KILL 1872414
 + '[' -f .aux ']'
 + : Falso.
 + ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ + : '########## ATENCIÓN ##########'
 + :
 + : 'El fichero ".aux" NO se ha creado.'
 + : 'Debe modificarse al valor actual de las variables con putenv.'
@@ -1042,22 +1341,26 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Se deben poder ejecutar en una secuencia.       »»»'
 + : '«««   Debe tener efecto permanente si es el último.   »»»'
 + :
-+ Sincronizar
-rm: cannot remove '.aux': No such file or directory
--KILL 2808812
-sh: 208: -KILL: not found
-ls: cannot access '.aux': No such file or directory
-+ '[' -f .aux ']'
-+ : Falso.
-+ ERROR_GRAVE
+rm+ Sincronizar
+ -f .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ : La línea siguiente al "read" es: rm .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ echo xua. hcuot | rev | read CMD AUX
+[33mUsing pipe @ process echo -> : 1872425
+[0m[33mUsing pipe @ process rev -> : 1872426
+[0m
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ touch .aux
+
+jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 
+You hitted ctrl-D | bye!
++ TIMEOUT
 + : '########## ATENCIÓN ##########'
++ : 'Posible bloqueo (3) del Minishell.'
 + :
-+ : 'El fichero ".aux" NO se ha creado.'
-+ : 'Debe poderse redirigir la salida y/o entrada estándar'
-+ : 'de los mandatos especiales a/desde una secuencia.'
-+ : 'Si este test le funciona cuando lo ejecuta desde un terminal,'
-+ : 'pruebe a incluir entre las primeras líneas del programa:'
-+ : '	setbuf(stdin, NULL);	'
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
 + :
 + LEVEL=75
 + :
@@ -1066,214 +1369,16 @@ ls: cannot access '.aux': No such file or directory
 + : 'Cuando se invoca "read" con mas argumentos que palabras:'
 + : '«««   Las variables de mas NO deben modificar su valor.   »»»'
 + :
-+ Sincronizar
-sh: 214: +: not found
-expr: syntax error: unexpected argument '$B'
-++ cat .aux
-+ '[' '' -eq 6 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2462: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'Si aparecen mas nombres de variable que palabras,'
-+ : 'las variables de mas NO deben modificar su valor.'
-+ rm -f .aux
-+ :
-+ Interno_read_V _________________________________________________________
-+ :
-+ : 'Cuando se invoca "read" con mas palabras que argumentos:'
-+ : '«««   Las últimas palabras asignadas al último argumento.   »»»'
-+ :
-+ Sincronizar
-sh: 222: 1: not found
-echo $A $B $C | wc -w > .aux
-cat: .aux: No such file or directory
-++ cat .aux
-cat: .aux: No such file or directory
-+ '[' '' -eq 5 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2493: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'Si aparecen mas palabras que nombres de variable,'
-+ : 'las últimas variables se deben asignar a la última variable.'
-+ rm -f .aux
-+ :
-+ Interno_read_VI ________________________________________________________
-+ :
-+ : 'Cuando se invoca "read" sin argumentos:'
-+ : '«««   Se debe leer la línea de entrada.   »»»'
-+ : '«««   Se debe notificar el error.         »»»'
-+ :
-+ Sincronizar
-sh: 228: read: arg count
--rw-rw--w- 1 jail jail 0 Oct 12 15:00 .aux
-+ '[' -f .aux ']'
-+ : Cierto.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'El fichero ".aux" se ha creado.'
-+ : 'Si "read" se invoca sin argumentos, debe darse un error'
-+ : 'pero la línea de entrada ha de ser consumida.'
-+ rm -f .aux
-+ :
-+ LEVEL=80
-+ :
-+ Variables_especiales_I _________________________________________________
-+ :
-+ : 'Donde aparezca la variable especial "mypid" :'
-+ : '«««   Se debe sustituir por el identificador   »»»'
-+ : '«««   del propio proceso Minishell.            »»»'
-+ :
-+ Sincronizar
-
-++ cat .aux
-+ '[' '' -eq 2808438 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2551: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'La variable especial "mypid" NO se sustituye por el valor correcto.'
-+ rm -f .aux
-+ :
-+ Variables_especiales_II ________________________________________________
-+ :
-+ : 'Donde aparezca la variable especial "status" :'
-+ : '«««   Se debe sustituir por el valor de terminación   »»»'
-+ : '«««   del último mandato.                             »»»'
-+ :
-+ Sincronizar
-cat: ...: No such file or directory
-++ cat .aux
-+ '[' '' -eq 0 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2579: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'La variable especial "status" no mantiene el valor del mandato.'
-+ rm -f .aux .aux2
-+ :
-+ Variables_especiales_III _______________________________________________
-+ :
-+ : 'Donde aparezca la variable especial "status" :'
-+ : '«««   Se debe sustituir por el valor de terminación   »»»'
-+ : '«««   de la última secuencia de mandatos              »»»'
-+ : '«««   (el del último mandato de la secuencia).        »»»'
-+ :
-+ Sincronizar
-cat: ...: No such file or directory
-cat: ...: No such file or directory
-++ cat .aux
-+ '[' '' -eq 0 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2611: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'La variable especial "status" no mantiene el valor de la secuencia.'
-+ rm -f .aux .aux2 .aux3
-+ :
-+ LEVEL=85
-+ :
-+ Variables_especiales_IV ________________________________________________
-+ :
-+ : 'Donde aparezca la variable especial "status" :'
-+ : '«««   Se debe sustituir por el valor de terminación   »»»'
-+ : '«««   del último mandato interno                      »»»'
-+ : '«««   (0 si fue correcto y no 0 si fue incorrecto).   »»»'
-+ :
-+ Sincronizar
-sh: 247: cd: can't cd to ...
-++ cat .aux
-+ '[' '' -ne 0 ']'
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 2642: [: : integer expression expected
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'La variable especial "status" no mantiene el valor del interno.'
-+ rm -f .aux .aux2
-+ :
-+ Variables_especiales_V _________________________________________________
-+ :
-+ : 'Donde aparezca la variable especial "bgpid" :'
-+ : '«««   Se debe sustituir por el identificador        »»»'
-+ : '«««   del último proceso arrancado en background.   »»»'
-+ :
-echo $$ > .out ; /bin/kill -ALRM 2808895
-+ Sincronizar
-+ cmp -s .out .out2
-+ : Falso.
-+ ERROR_GRAVE
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'La variable especial "bgpid" NO se sustituye por el valor correcto.'
-+ rm -f .out .out2 .doit
-+ :
-+ LEVEL=90
-+ :
-+ Expansion_de_comodines_I _______________________________________________
-+ :
-+ : 'Cuando aparezca un carácter "?" :'
-+ : '«««   Si un fichero casa con el patrón indicado,              »»»'
-+ : '«««   se debe sustituir el texto por el nombre del fichero.   »»»'
-+ :
-+ Sincronizar
-.aux2
-++ cat .out
-+ '[' .aux2 = .aux2 ']'
-+ : 'Cierto. Bien.'
-+ rm -f .out .aux .aux2
-+ :
-+ Expansion_de_comodines_II ______________________________________________
-+ :
-+ : 'Cuando aparezca un carácter "?" :'
-+ : '«««   Si el patrón no casa con ningún fichero,   »»»'
-+ : '«««   NO se debe alterar el texto.               »»»'
-+ :
-+ Sincronizar
-.aux?
-++ cat .out
-+ '[' '.aux?' = '.aux?' ']'
-+ : 'Cierto. Bien.'
-+ rm -f .out .aux
-+ :
-+ LEVEL=95
-+ :
-+ Expansion_de_comodines_III _____________________________________________
-+ :
-+ : 'Cuando aparezca un carácter "?" :'
-+ : '«««   Si varios ficheros casan con el patrón indicado,             »»»'
-+ : '«««   se debe expandir a tantos textos como nombres de ficheros.   »»»'
-+ :
-+ Sincronizar
-.aux .aux2 .aux3 .aux
-++ cat .out
-+ '[' '.aux .aux2 .aux3 .aux' = '.aux .aux2 .aux3 .aux' ']'
-+ : 'Cierto. Bien.'
-+ rm -f .out .aux .aux2 .aux3
-+ :
-+ LEVEL=100
-+ :
-+ :
-+ FIN_DE_LA_CORRECCION ===================================================
-+ :
-+ :
-+ exit 10
-
-jail@home2/datsi/ssoo/soX/msh/home.2022b13/c200172$ 
-You hitted ctrl-D | bye!
+++ BROKEN_PIPE
+++ : '########## ATENCIÓN ##########'
+++ : 'Terminación anómala del Minishell.'
+++ :
+++ : 'Sólo debe terminar al llegar al EOF de su entrada estándar.'
+++ : 'No deben producirse señales como SIGBUS o SIGSEGV que le maten.'
+++ : 'No debe hacer EXIT ante errores provocados por el usuario.'
+++ :
+++ exit 5
 + case $NOTA in
-+ : 10
-+ : '*** ATENCIÓN ***'
-+ : 'Para APROBAR LA PARTE PRACTICA de la asignatura       '
-+ : 'es IMPRESCINDIBLE obtener como mínimo 4.5 puntos.     '
-+ : 'Debe usted llegar a una media de 4.5 entre esta       '
-+ : 'práctica y las demás (si las hubiera).                '
-+ :
-+ exit 10
++ : 5
++ : 'No se supera el nivel mínimo admisible.'
++ exit 5

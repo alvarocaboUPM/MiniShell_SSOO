@@ -328,13 +328,26 @@ int main(void)
 							errorPrint("Cerrando [READ_END] en padre");
 					}
 
-					if (!bg)
-					{	
-						/*Supendemos padre hasta que Hijo.status -> Terminated
-							sin fijarnos en el return status del hijo
-						*/
-						waitpid(pid, NULL, 0);
-						// printf("I Waited for -> %d, even though my pid is %d \n",waitpid(pid, NULL, 0), pid); //espera por su hijo
+					if(isLast){
+						if (!bg){	
+							int ret_status;
+							/*Supendemos padre hasta que Hijo.status -> Terminated
+								sin fijarnos en el return status del hijo
+							*/
+							while (pid != wait(&ret_status)) 
+										continue;
+							
+							char stat_str[4];
+                            sprintf(stat_str, "%d", ret_status);
+                            setenv("status", stat_str, 1);		
+						}
+						else{
+							bg_Pid = pid;
+							fprintf(stdout, "[%d]\n", pid);
+							char backgr_pid_str[7];
+							sprintf(backgr_pid_str, "%d", bg_Pid);
+							setenv("bgpid", backgr_pid_str, 1);
+						}
 					}
 				}
 
@@ -520,17 +533,17 @@ int *countArgs(char ***argvv, int argvc)
 */
 int exeIC(char **argv, int argc, char** redirs){
 
-	int resAt = redirHandler(redirs), og=0;
+	int redAt = redirHandler(redirs), og=0;
 
 	for (int i = 0; i < 4; i++)
 	{
 		if (!strcmp(function_map[i].name, argv[0]) && function_map[i].func)
 		{
 			// Ejecuta la función
-			if(resAt > -1 && redir(resAt, redirs, &og)!=resAt)
-			errorPrint("Error en la redirección");
+			if(redAt > -1 && redir(redAt, redirs, &og)!=redAt)
+				errorPrint("Error en la redirección");
 			function_map[i].func(argv, argc);
-			dup2(og, resAt);
+			dup2(og, redAt);
 			return 0;
 		}
 	}
@@ -541,13 +554,14 @@ int exeIC(char **argv, int argc, char** redirs){
 /* Used the --help section of these command to complete the
 	closest implementation for this minishell */
 
+/*
+	@param [dir] (argc <=2)
+	if length(argv) == 1 -> dir = $HOME
+	@return 0 if $PWD changed, -1 otherwise
+*/
 int cdIC(char **argv, int argc)
 {
-	/*
-	@param: [dir] (argc <=2)
-		* if length(command) == 1 -> dir = $HOME
-	@return 0 if $PWD changed, -1 otherwise
-	*/
+	
 
 	char *dir;
 
@@ -619,6 +633,7 @@ int readIC(char **argv, int argc)
 {
 	return -1;
 }
+
 
 /* DEBUGGIN TOOLS */
 

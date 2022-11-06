@@ -72,7 +72,7 @@ int redir(int i, char** filev, int* original);
 // Visuals
 void printWelcome();
 void PrintPromtCWD();
-void errorPrint(char *err);
+int errorPrint(char *err);
 void warningPrint(char *err);
 void okPrint(char *err);
 
@@ -234,24 +234,22 @@ int main(void)
 				case -1:
 					errorPrint("fork");
 					break;
-					//exit(1);
 				/*****************
 				 *	 HIJO		 *
 				 ******************/
 				case 0:
-					//puts("HIJO");
 					// Case redirects: 
 					if(isFirst && hasRedirects == STDIN_FILENO
 					&& redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
-						errorPrint("Error al redirigir la entrada estandar en hijo");
+						return errorPrint("Error al redirigir la entrada estandar en hijo");
 					
 					if(isLast && hasRedirects == STDOUT_FILENO 
 					&& redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
-						errorPrint("Error al redirigir la salida estandar en hijo");
+						return errorPrint("Error al redirigir la salida estandar en hijo");
 				 	
 					if(hasRedirects == STDERR_FILENO
 					&& redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
-						errorPrint("Error al redirigir la salida de error estandar en hijo");
+						return errorPrint("Error al redirigir la salida de error estandar en hijo");
 
 					// Case: Pipe requested (ESCRITORES)
 					if (in_pipe)
@@ -304,7 +302,6 @@ int main(void)
 				 *	 PADRE		 *
 				 ****************/
 				default:
-						//puts("PADRE");
 					// Case: Pipe requested (LECTOR)
 					if (in_pipe)
 					{
@@ -350,13 +347,10 @@ int main(void)
 						}
 					}
 				}
-
-			//Restaura los redirects
-			if(isLast && hasRedirects!=-1){
-				//restore
-				//write(0, "RESTAURO",9);
-				dup2(original, hasRedirects);
-				
+				//Restaura los redirects
+				if(isLast && hasRedirects!=-1){
+				 //restore
+				 dup2(original, hasRedirects);
 			}
 		}
 			// Si el command introducido no está en usr/bin o no está
@@ -383,11 +377,12 @@ void printWelcome()
 /*
 	Escribe el error en rojo utilizando perror
 */
-void errorPrint(char *err)
+int errorPrint(char *err)
 {
 	fprintf(stderr, RED);
 	perror(err);
 	fprintf(stderr, RESET);
+	return -1;
 }
 
 /*
@@ -482,20 +477,15 @@ int redir(int i, char** filev, int *original){
 	//Control errores 1
 	//printf("FD -> %d, ORIGINAL -> %d, NOM: %s\n", fd, *original, filev[i]);
 	
-	if(fd < 3){
-		errorPrint("No se pudo redirigir");
-		return -1;
-	}
+	if(fd < 3)
+		return errorPrint("No se pudo redirigir");
+	
 		
-	if (dup2(fd, i) < 0){
-		errorPrint("Error en el dup2 de redir");
-		return -1;
-	}
-		
-	if (close(fd) < 0){
-		errorPrint("Error al cerrar el archivo de redirección");
-		return -1;
-	}
+	if (dup2(fd, i) < 0)
+		return errorPrint("Error en el dup2 de redir");
+
+	if (close(fd) < 0)
+		return errorPrint("Error al cerrar el archivo de redirección");
 
 	return i;
 }
@@ -561,8 +551,6 @@ int exeIC(char **argv, int argc, char** redirs){
 */
 int cdIC(char **argv, int argc)
 {
-	
-
 	char *dir;
 
 	switch (argc)

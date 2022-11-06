@@ -36,11 +36,15 @@
 #include <pwd.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <strings.h>
 #include <stdbool.h>
 #include <dirent.h>
+//Permisos open
+#define _GNU_SOURCE
+#include <fcntl.h>
 
 /******	Variables Globales	***/
 #define READ_END 0
@@ -57,12 +61,14 @@
 
 static pid_t PID;		   // Identificador de proceso
 static char CWD[MAX_PATH]; // Path de trabajo actual
-static char *HOME;		   // Path del home
+//static char *HOME;		   // Path del home
 
 /***Declaración de funciones*/
 
 extern int obtain_order(); /* See parser.y for description */
-int *countArgs(char ***argvv, int argvc);
+int* countArgs(char ***argvv, int argvc);
+int redirHandler(char** filev);
+int redir(int i, char** filev, int* original);
 // Visuals
 void printWelcome();
 void PrintPromtCWD();
@@ -70,8 +76,7 @@ void errorPrint(char *err);
 void warningPrint(char *err);
 void okPrint(char *err);
 
-// Internal functions
-int exeIC(char **argv, int argc);
+int exeIC(char **argv, int argc, char ** redirs);
 int cdIC(char **argv, int argc);
 int timeIC(char **argv, int argc);
 int umaskIC(char **argv, int argc);
@@ -81,6 +86,8 @@ void printIntArray(int *arr);
 void printCharArray(char *arr);
 int getArraySize(void *arr);
 int getFDsOpen();
+void printFlags();
+char* printRedir(int redir);
 
 // Lista de funciones internas
 const char *ICommands[4] = {"cd", "umask", "time", "read"};
@@ -98,6 +105,13 @@ const static struct
 	{"read", readIC},
 };
 
+/*
+Mapa de flags de estado
+*/
+static bool in_pipe= false;
+static bool isLast= false;
+static bool isFirst= false;
+
 /******* Main ********/
 
 int main(void)
@@ -107,10 +121,9 @@ int main(void)
 	// GIVEN main parameters
 	char ***argvv = NULL;
 	int argvc;
-	char **argv = NULL;
-	int argc;
+
 	char *filev[3] = {NULL, NULL, NULL}; // Posibles redirects
-	int bg;								 // Flag for background needed (0/1)
+	int bg;	// Flag for background needed (0/1)
 	int ret;
 	// MY main parameters
 	int bg_Pid = 0; // PID de la función de bg
@@ -132,54 +145,69 @@ int main(void)
 	{
 		// Necesitamos obtener el dir y el PID del calling process
 		getcwd(CWD, sizeof(CWD));
-		PrintPromtCWD(CWD);
+		//PrintPromtCWD(CWD);
+		printf("\nmsh> ");
 		ret = obtain_order(&argvv, filev, &bg);
-		if (ret == 0)
+		if (ret == 0) /* EOF */
 		{
-			/* EOF */
 			fprintf(stderr, "\nYou hitted ctrl-D | bye!\n");
 			break;
 		}
-		if (ret == -1)
-			continue;	 /* Syntax error */
+		if (ret == -1) continue;	 /* Syntax error */
 		argvc = ret - 1; /* Line */
-		if (argvc == 0)
-			continue; /* Empty line */
+		if (argvc == 0) continue; /* Empty line */
 
 #if 1
 		/*YOU CAN COMMENT THIS SECTION BY SWITCHING THE IF*/
-		char **command;
 		int *argcc = countArgs(argvv, argvc);
-		int total_N_commands = argcc[0];
-		int current_N_commands = 0;
-		// Adding pipes
-		int m_pipe[2];
-		int inuse_fd = 0;
-		// Some flags
-		bool in_pipe, isLast;
-		in_pipe = isLast = false;
+		char **command = NULL;
+		int atCommand = 0; //Numero de comandos registrados
 
 		// Si hay más de un comando se interpreta como un pipe
-		in_pipe = total_N_commands > 1;
+		in_pipe = argvc > 1;
 
-		//================DEBUG=================
-		// printf("%d\n", (total_N_commands));
-		// printIntArray(argcc);
-
+		// Adding pipes
+		int m_pipe[2];
+		int inuse_fd;
 		int stdin_copy;
 
-		if(in_pipe)
+		if(in_pipe){
 			//Guardamos el contenido de la entrada estandar
+			inuse_fd = 0;
 			stdin_copy = dup(STDIN_FILENO);
+		}
 
-		// Presenting the input commands
-		while ((command = argvv[current_N_commands]))
-		{
-			//printf("FDs-> %d\n", getFDsOpen());
-			// Gestión básica de arguemtos y el comando
-			int n_args = argcc[current_N_commands + 1] - 1; // Le quitamos el nombre del comando
-			// fprintf(stderr, "#%d: \"%s\" using %d argument/s\n", current_N_commands, command[0], n_args);
-			current_N_commands++; // current_N_commands <= argcc.length
+		// Handling individual commands
+		while ((command = argvv[atCommand])){
+			int n_args = argcc[atCommand] - 1; // Le quitamos el nombre del comando
+
+			// Updates flags
+			isLast = atCommand == argvc-1;
+			isFirst = atCommand == 0;
+			//Handles redirect
+			int original=0;
+			int hasRedirects = redirHandler(filev);
+
+			atCommand++; // atCommand <= argvc
+
+			//========Debuggin station===========
+			
+			#if 0
+				fprintf(stderr, "#%d: \"%s\" using %d argument/s\n", atCommand-1, command[0], n_args);
+				okPrint("FDs Opened\n");
+				printf("FDs-> %d\n", getFDsOpen());
+				okPrint("FLAGS\n");
+				printFlags();
+				okPrint("REDIRS-> ");
+				if(hasRedirects ==-1 ){
+					puts("Nope");
+				}else{
+					printf("%s: %s", printRedir(hasRedirects), filev[hasRedirects]);
+				}
+				
+				puts(" "
+					 " ");
+			#endif
 
 			// Catch null
 			if (command == NULL)
@@ -190,32 +218,41 @@ int main(void)
 					break;
 				}
 				continue;
-			} 
-
-			// Checks if a pipe has been requested, if so, it trys to create it
-			if (in_pipe && pipe(m_pipe) < 0)
-			{
-				errorPrint("No se ha podido crear el pipe");
 			}
 
-			// Checks if we are @ the final command
-			isLast = current_N_commands == total_N_commands;
+			// Checks if a piredirGetterpe has been requested, if so, it trys to create it
+			if (in_pipe && pipe(m_pipe) < 0)
+				errorPrint("No se ha podido crear el pipe");
 
 			/*Now we have to discriminate wether the command is
 				internal or is located in /usr/bin: */
 
-			if (exeIC(command, n_args) == -1)
-			{
+			if(exeIC(command, n_args, filev)==-1){
 				pid_t pid;
 				switch (pid = fork())
 				{
 				case -1:
 					errorPrint("fork");
-					exit(1);
+					break;
+					//exit(1);
 				/*****************
 				 *	 HIJO		 *
 				 ******************/
 				case 0:
+					//puts("HIJO");
+					// Case redirects: 
+					if(isFirst && hasRedirects == STDIN_FILENO
+					&& redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
+						errorPrint("Error al redirigir la entrada estandar en hijo");
+					
+					if(isLast && hasRedirects == STDOUT_FILENO 
+					&& redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
+						errorPrint("Error al redirigir la salida estandar en hijo");
+				 	
+					if(hasRedirects == STDERR_FILENO
+					&& redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
+						errorPrint("Error al redirigir la salida de error estandar en hijo");
+
 					// Case: Pipe requested (ESCRITORES)
 					if (in_pipe)
 					{
@@ -261,28 +298,29 @@ int main(void)
 						errorPrint(error_message);
 						free(error_message);
 					}
-					exit(EXIT_FAILURE);
+					//break; //No hace falta break pq exec termina el proceso hijo 
 
 				/***************
 				 *	 PADRE		 *
 				 ****************/
 				default:
+						//puts("PADRE");
 					// Case: Pipe requested (LECTOR)
 					if (in_pipe)
 					{
 						if (close(inuse_fd) < 0)
 							errorPrint("Cerrando el [WRITE_END] no cerrado del hijo");
-						if (!isLast)
+						if (isLast)
 						{
-							inuse_fd = dup(m_pipe[READ_END]);
-						}
-						else
-						{
-							// Reconfiguramos
+							// Restauramos la entrada estandar
 							dup2(stdin_copy, STDIN_FILENO);
-							printf("STDIN_COPY -> %d\n", stdin_copy);
+							//printf("STDIN_COPY -> %d\n", stdin_copy);
 							close(stdin_copy);
 						}
+						else
+							//Duplicamos en un nuevo fd el lado lector
+							inuse_fd = dup(m_pipe[READ_END]);
+					
 						// try closing both ends
 						if (close(m_pipe[WRITE_END]) < 0)
 							errorPrint("Cerrando [WRITE_END] en padre");
@@ -291,12 +329,23 @@ int main(void)
 					}
 
 					if (!bg)
-					{
+					{	
+						/*Supendemos padre hasta que Hijo.status -> Terminated
+							sin fijarnos en el return status del hijo
+						*/
 						waitpid(pid, NULL, 0);
 						// printf("I Waited for -> %d, even though my pid is %d \n",waitpid(pid, NULL, 0), pid); //espera por su hijo
 					}
 				}
+
+			//Restaura los redirects
+			if(isLast && hasRedirects!=-1){
+				//restore
+				//write(0, "RESTAURO",9);
+				dup2(original, hasRedirects);
+				
 			}
+		}
 			// Si el command introducido no está en usr/bin o no está
 			// implementado en la shell, saltará un error de no implementado
 		}
@@ -364,7 +413,6 @@ void PrintPromtCWD(char *CWD)
 
 	while (p != NULL)
 	{
-		// printf("%s", p);
 		if (i > 1)
 		{
 			strcat(prompt, p);
@@ -384,17 +432,69 @@ void PrintPromtCWD(char *CWD)
 			prompt);
 }
 
-/* Función que interpreta el mapa de argvv
-   y devuelve el número de comandos distintos (sizeof(res)) y
-   el número de arguementos de cada uno*/
+/* 
+   @param filev[3]
+   @return Index of the redirected fd
+*/
+int redirHandler(char** filev){
+	int i=0;
+	while(i<=3){
+		if(i==3) 
+			return -1;
+		if(filev[i]!=NULL){
+			break;
+		}
+		i++;
+	}
+	return i;
+}
+
+/*
+	Implemets the logic of redirect 
+	@return The index given in case of success
+	@throw -1 if something wrong
+*/
+int redir(int i, char** filev, int *original){
+	/* 0 = < STDIN	|| 1 = > STDOUT || 2 = >& STDERR */
+	int fd;
+	if(i == STDIN_FILENO){
+		fd = open(filev[i], O_RDONLY, 0666); //Solo leemos
+	}else{
+		fd = creat(filev[i], S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		//fd = open(filev[i], O_CREAT | O_TRUNC | O_WRONLY, 0666);
+	}
+	
+	*original = dup(i); //Duplicamos para poder restaurar
+
+	//Control errores 1
+	//printf("FD -> %d, ORIGINAL -> %d, NOM: %s\n", fd, *original, filev[i]);
+	
+	if(fd < 3){
+		errorPrint("No se pudo redirigir");
+		return -1;
+	}
+		
+	if (dup2(fd, i) < 0){
+		errorPrint("Error en el dup2 de redir");
+		return -1;
+	}
+		
+	if (close(fd) < 0){
+		errorPrint("Error al cerrar el archivo de redirección");
+		return -1;
+	}
+
+	return i;
+}
+
+/* 
+   @param Array de comandos y su longitud
+   @return Número de argumentos de cada comando
+*/
 int *countArgs(char ***argvv, int argvc)
 {
-
-	/*EL PRIMER ELEMENTO VA SER EL LENGTH*/
-
-	int *res = malloc(argvc + 1);
+	int *res = malloc(argvc);
 	int i = 0;
-	res[0] = 0;
 
 	while (argvv[i] != NULL)
 	{
@@ -405,35 +505,43 @@ int *countArgs(char ***argvv, int argvc)
 			// fprintf(stderr, "\t%d : %s\n", count, test);
 			count++;
 		}
-		res[i + 1] = count;
+		res[i] = count;
 		// fprintf(stderr, "\tRes[%d]: %d\n", i, res[i]);
 		i++;
-		res[0] = i;
 	}
 	return res;
 }
 
 /*INTERNAL COMMANDS SELECT AND IMPLEMENTATION*/
-int exeIC(char **command, int argc)
-{
-	/*Given a command name returns its function*/
 
-	for (int i = 0; i < (sizeof(function_map) / sizeof(function_map[0])); i++)
+/*
+	@param Command name, arguments and arguments.length
+	@result Execution of the proper internal function
+*/
+int exeIC(char **argv, int argc, char** redirs){
+
+	int resAt = redirHandler(redirs), og=0;
+
+	for (int i = 0; i < 4; i++)
 	{
-		if (!strcmp(function_map[i].name, command[0]) && function_map[i].func)
+		if (!strcmp(function_map[i].name, argv[0]) && function_map[i].func)
 		{
 			// Ejecuta la función
-			function_map[i].func(command, argc);
+			if(resAt > -1 && redir(resAt, redirs, &og)!=resAt)
+			errorPrint("Error en la redirección");
+			function_map[i].func(argv, argc);
+			dup2(og, resAt);
 			return 0;
 		}
 	}
+
 	return -1;
 }
 
 /* Used the --help section of these command to complete the
 	closest implementation for this minishell */
 
-int cdIC(char **command, int argc)
+int cdIC(char **argv, int argc)
 {
 	/*
 	@param: [dir] (argc <=2)
@@ -450,7 +558,7 @@ int cdIC(char **command, int argc)
 		dir = getenv("HOME");
 		break;
 	case 1:
-		dir = command[1];
+		dir = argv[1];
 		break;
 	default:
 		errorPrint("Cant have more than 1 argument for 'CD'");
@@ -517,13 +625,14 @@ int readIC(char **argv, int argc)
 void printIntArray(int *arr)
 {
 	puts("\nPriting Int array: \n");
-	int i;
+	int i,x;
 	printf("[");
 
-	for (i = 0; i < sizeof(arr) / sizeof(int); i++)
+	for (i = 0; (x=arr[i]); i++)
 	{
-		printf("%d, ", arr[i]);
+		printf("%d, ", x);
 	}
+	
 	printf("]\n");
 }
 
@@ -533,7 +642,7 @@ void printCharArray(char *arr)
 	int i;
 	printf("[");
 
-	for (i = 0; i < sizeof(arr) / sizeof(int); i++)
+	for (i = 0; i < sizeof(arr); i++)
 	{
 		printf("%c, ", arr[i]);
 	}
@@ -548,20 +657,43 @@ int getFDsOpen()
 		return -1;
 	}
 	struct dirent *de;
-	int count = -3; // '.', '..', dp
+	int count = -2; // '.', '..', dp
 
 	if (dp == NULL)
 		return -1;
 
-	char buffer[1000];
+	//char buffer = malloc(1000);
 	while ((de = readdir(dp)) != NULL)
 	{
-		if (count >= 0)
+		if (count >= 0){
+
 			printf("%s, ", de->d_name);
+		}
 		count++;
 	}
 
 	(void)closedir(dp);
-
 	return count;
+}
+
+void printFlags(){
+	printf("isFirst-> %s\n", isFirst ? "true" : "false");
+	printf("isLast->%s\n", isLast ? "true" : "false");
+	printf("in_pipe %s\n", in_pipe ? "true" : "false");
+}
+char* printRedir(int redir){
+	char* result;
+	switch (redir)
+	{
+	case 0:
+		result="IN";
+		break;
+	case 1:
+		result="OUT";
+		break;
+	default:
+		result="ERR";
+		break;
+	}
+return result;
 }

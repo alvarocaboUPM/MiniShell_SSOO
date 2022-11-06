@@ -1,0 +1,479 @@
++ INVOCACION '/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3 -2022b'
++ :
++ : '	 "Corrector de la práctica del Minishell. Versión 4.5.3"'
++ : '	 "Copyright © 1993-2020 Francisco Rosales «frosal@fi.upm.es»"'
++ :
++ : '	 FECHA: "Thu Nov  3 21:00:01 CET 2022"'
++ : '	 GRUPO: "c200172"'
++ : '	 AUTORES: "c200172; alvaro.cabo@alumnos.upm.es; Álvaro Cabo Ciudad"'
++ :
++ INTRODUCCION
++ :
++ : 'El presente texto es la traza de ejecución de las pruebas'
++ : 'realizadas sobre su práctica del Minishell.'
++ :
++ : 'Las líneas de este texto que comienzan por "+" son mandatos'
++ : 'de un Bourne Shell que tiene tal carácter como prompt.'
++ : 'El mandato ":" es el mandato nulo.'
++ :
++ : 'Para localizar rápidamente las partes de interés de este texto,'
++ : 'buscad la tira "########## ATENCIÓN ##########" .'
++ :
++ : Nota:
++ : '	 Esta utilidad se encuentra EN DESARROLLO.'
++ : '	 Los RESULTADOS obtenidos NO son DEFINITIVOS y, por tanto,'
++ : '	 la VALORACIÓN obtenida NO se entenderá como DEFINITIVA.'
++ :
++ DONDE_OBTENER_AYUDA
++ :
++ : 'La información básica necesaria para la realización de esta'
++ : 'práctica se encuentra en los siguientes documentos:'
++ : ' #	 Memoria de la práctica. Contiene información abundante'
++ : '	 y detallada sobre el comportamiento deseado, y muchas'
++ : '	 referencias a las funciones que se deben usar.'
++ : ' #	 Manual de UNIX. En caso de duda sobre como usar una'
++ : '	 función de librería o mandato, utilice el mandato man.'
++ : ' #	 Libros de C. La bibliografía sobre este lenguaje es muy'
++ : '	 extensa. Sea meticuloso y limpio a la hora de programar'
++ : '	 y no deje de comentar debidamente su propio código.'
++ :
++ :
++ PREPARACION_DEL_ENTORNO_DE_TRABAJO =====================================
++ :
++ Crear_nulo _______________________________________________ previo ______
++ :
++ '[' -f :.c ']'
++ : 'Ya existe.'
++ make :
+make: ':' is up to date.
++ ./: Bien.
++ :
++ Crear_freefds ____________________________________________ previo ______
++ :
++ '[' -f freefds.c ']'
++ : 'Ya existe.'
++ make freefds
+make: 'freefds' is up to date.
++ : Bien.
++ :
++ Crear_nofiles ____________________________________________ previo ______
++ :
++ '[' -f nofiles.c ']'
++ : 'Ya existe.'
++ make nofiles
+make: 'nofiles' is up to date.
++ : Bien.
++ :
++ : 'Recordamos el numero de descriptores de fichero disponibles.'
+++ ./nofiles
++ NOFILES=1024
++ :
++ Crear_killmyself _________________________________________ previo ______
++ :
++ '[' -f killmyself.c ']'
++ : 'Ya existe.'
++ make killmyself
+make: 'killmyself' is up to date.
++ : Bien.
++ :
++ Crear_sigdfl _____________________________________________ previo ______
++ :
++ '[' -f sigdfl.c ']'
++ : 'Ya existe.'
++ make sigdfl
+make: 'sigdfl' is up to date.
++ : Bien.
++ :
++ Eliminar_ficheros_temporales _____________________________ previo ______
++ :
++ : 'Borramos los ficheros temporales que se utilizan.'
++ :
++ rm -f .aux .aux2 .aux3 .void .doit .env .ls1
++ rm -f .rm .out .out2 .ddf .pwd .cd .home
++ :
++ Establecer_entorno _______________________________________ previo ______
++ :
++ : 'Antes de continuar, establecemos el entorno que será heredado por'
++ : 'todo mandato que se ejecute a partir de ahora.'
++ :
++ umask 0
++ PATH=/bin:/usr/bin:/usr/local/bin:.
++ HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
++ WHO=c200172
++ export PATH HOME WHO
++ :
++ Compilar_el_Minishell ____________________________________ previo ______
++ :
++ make msh
+gcc -Wall -g   -c -o main.o main.c
+main.c: In function 'main':
+main.c:134:28: warning: multi-line comment [-Wcomment]
+  134 |  signal(SIGQUIT, SIG_IGN); // Ctrl+shitft+\
+      |                            ^
+main.c:128:6: warning: unused variable 'bg_Pid' [-Wunused-variable]
+  128 |  int bg_Pid = 0; // PID de la función de bg
+      |      ^~~~~~
+main.c:123:6: warning: unused variable 'argc' [-Wunused-variable]
+  123 |  int argc;
+      |      ^~~~
+main.c:122:9: warning: unused variable 'argv' [-Wunused-variable]
+  122 |  char **argv = NULL;
+      |         ^~~~
+main.c: In function 'printIntArray':
+main.c:611:30: warning: division 'sizeof (int *) / sizeof (int)' does not compute the number of array elements [-Wsizeof-pointer-div]
+  611 |  for (i = 0; i < sizeof(arr) / sizeof(int); i++)
+      |                              ^
+main.c:605:25: note: first 'sizeof' operand was declared here
+  605 | void printIntArray(int *arr)
+      |                    ~~~~~^~~
+main.c: In function 'cdIC':
+main.c:558:1: warning: control reaches end of non-void function [-Wreturn-type]
+  558 | }
+      | ^
+main.c: In function 'umaskIC':
+main.c:596:1: warning: control reaches end of non-void function [-Wreturn-type]
+  596 | }
+      | ^
+At top level:
+main.c:64:14: warning: 'HOME' defined but not used [-Wunused-variable]
+   64 | static char *HOME;     // Path del home
+      |              ^~~~
+gcc -Wall -g  -o msh parser.o scanner.o main.o
++ : Bien.
++ :
++ :
++ PRINCIPIO_DE_LA_CORRECCION =============================================
++ :
++ LEVEL=0
++ :
++ case "$COMPLEX" in
++ Lineas_simples_y_fin_de_fichero ________________________________________
++ :
++ : 'Su Minishell debe aceptar líneas en blanco y mandatos simples'
++ : 'y debe terminar limpiamente cuando se cierre su entrada estándar.'
++ :
++ MSHPID=2468314
++ ./msh
++ wait 2468314
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ __   __   _______ ___    __   __ _______ ______   _______ 
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
+msh> 
+msh> 
+msh>      
+msh> 		 
+msh> /usr/bin/env
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/usr/bin/env" using 0 argument/s
+PWD=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+WHO=c200172
+TMPDIR=/tmp
+SHLVL=0
+PATH=/bin:/usr/bin:/usr/local/bin:.
+_=./msh
+msh> /bin/echo
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/bin/echo" using 0 argument/s
+
+msh> ../../../../../../../../../../bin/echo
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "../../../../../../../../../../bin/echo" using 0 argument/s
+
+msh> ./:
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./:" using 0 argument/s
+msh> 
+msh> 
+You hitted ctrl-D | bye!
++ EXIT=0
++ case $EXIT in
++ : 0
++ : Bien.
++ :
++ Ejecucion_del_Minishell ________________________________________________
++ :
++ : 'Preparamos una tubería por la que inyectar mandatos al Minishell'
++ : 'y lanzamos su ejecución.'
++ :
++ rm -f .pipe
++ mkfifo .pipe
++ MSHPID=2468323
++ exec
++ exec ./sigdfl ./msh
++ rm -f .pipe
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ __   __   _______ ___    __   __ _______ ______   _______ 
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
+msh> + :
++ LEVEL=5
++ :
++ Mandatos_sin_argumentos ________________________________________________
++ :
++ : 'Se ejecutan mandatos, que están en el PATH, sin argumentos.'
++ :
+./:
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./:" using 0 argument/s
+msh> :
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 0 argument/s
+msh> echo
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "echo" using 0 argument/s
+
+msh> + :
++ Mandatos_con_varios_argumentos _________________________________________
++ :
++ : 'Se ejecutan mandatos, que están en el PATH, CON varios argumentos.'
++ :
++ : '	NOTA:'
++ : '	El siguiente mandato: "/bin/kill -KILL ##"'
++ : '	aparecerá en multitud de ocasiones en el presente texto.'
++ : '	Se utiliza para sincronizar la ejecución de dos procesos'
++ : '	el Minishell y el Corrector que le inyecta mandatos.'
++ : '		IGNÓRELO'
++ Sincronizar
+/bin/kill -KILL 2468333
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/bin/kill" using 2 argument/s
+msh> rm -f + Sincronizar
+.aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "rm" using 2 argument/s
+msh> touch .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "touch" using 1 argument/s
+msh> :
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 0 argument/s
+msh> : El mandato "touch" debe haber creado el fichero ".aux".
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 9 argument/s
+msh> : Veamos si existe, usando ls.
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 5 argument/s
+msh> :
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 0 argument/s
+msh> ls -l -a -1 -F -g -q -s .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "ls" using 8 argument/s
+0 -rw-rw-rw- 1 jail 0 Nov  3 21:00 .aux
+msh> :
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 0 argument/s
+msh> /bin/kill -KILL 2468336
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/bin/kill" using 2 argument/s
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ :
+msh> : Ahora lo + Sincronizar
+borramos.
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: ":" using 3 argument/s
+msh> rm -f .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "rm" using 2 argument/s
+msh> ls -l .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "ls" using 2 argument/s
+ls: cannot access '.aux': No such file or directory
+msh> /bin/kill -KILL 2468346
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/bin/kill" using 2 argument/s
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
+msh> + rm -f .aux
++ :
++ Descriptores_de_fichero ________________________________________________
++ :
++ : 'El numero de descriptores de fichero usados por el Minishell'
++ : 'debe mantenerse estable durante toda la ejecución del mismo.'
++ :
++ : '«««   Se deben cerrar los que NO se vayan a usar.   »»»'
++ :
+./freefds+ Sincronizar
+
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 0 argument/s
+1019
+msh> ./freefds
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 0 argument/s
+1019
+msh> ./freefds .ddf
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 1 argument/s
+msh> cat .ddf
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "cat" using 1 argument/s
+1019
+msh> ./freefds
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 0 argument/s
+1019
+msh> ./freefds
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 0 argument/s
+1019
+msh> ./freefds .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "./freefds" using 1 argument/s
+msh> cat .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "cat" using 1 argument/s
+1019
+msh> cmp .ddf .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "cmp" using 2 argument/s
+msh> /bin/kill -KILL 2468353
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "/bin/kill" using 2 argument/s
++ cmp -s .ddf .aux
+msh> + : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=10
++ :
++ Redireccion_de_salida_a_fichero_nuevo __________________________________
++ :
++ : '«««   Se debe crear el fichero.   »»»'
++ :
++ Sincronizar
+last -n 10 c200172 > .aux
+0, 1, 2, 3, 4, 8, FDs-> 6
+#0: "last" using 3 argument/s
+FD -> 4, ORIGINAL -> 5, NOM: .auxcat .aux
+#0: "cat" using 1 argument/s
+cat: write error: Bad file descriptor
+/bin/kill -KILL 2468365
+#0: "/bin/kill" using 2 argument/s
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ Redireccion_de_salida_a_fichero_existente ______________________________
++ :
++ : '«««   Se debe truncar el fichero.   »»»'
++ :
++ Sincronizar
+touch .void
+#0: "touch" using 1 argument/s
+cat .void > .aux
+#0: "cat" using 1 argument/s
+cmp .void .aux
+#0: "cmp" using 2 argument/s
+cmp: EOF on .void which is empty
+/bin/kill -KILL 2468370
+#0: "/bin/kill" using 2 argument/s
++ cmp -s .void .aux
++ : Falso.
++ ERROR_GRAVE
++ NOTA=10
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El fichero ".aux" NO se ha truncado.'
++ : 'Utilice la llamada al sistema CREAT.'
++ rm -f .aux .void
++ :
++ Redireccion_de_entrada_a_fichero_no_existente __________________________
++ :
++ : 'El Minishell debe tolerar los errores cometidos por el usuario:'
++ : '«««   Se debe detectar, notificar y tolerar el error.      »»»'
++ : '«««   Se debe abortar la ejecución del resto de la linea.  »»»'
++ :
+touch+ Sincronizar
+ .aux
+#0: "touch" using 1 argument/s
+rm -f .aux2
+#0: "rm" using 2 argument/s
+rm -f .noexiste
+#0: "rm" using 2 argument/s
+ls -l .aux .aux2 .noexiste
+#0: "ls" using 4 argument/s
+ls: cannot access '.aux2': No such file or directory
+ls: cannot access '.noexiste': No such file or directory
+ls: write error: Bad file descriptor
+: NO debería borrarse el fichero ".aux".
+#0: ":" using 6 argument/s
+: Debería crearse el fichero ".aux2".
+#0: ":" using 5 argument/s
+rm -f .aux < .noexiste
+#0: "rm" using 2 argument/s
+[31mNo se pudo redirigir: Bad file descriptor
+[0m[31mError en la redirección: Bad file descriptor
+[0m[31mNo se pudo redirigir: Bad file descriptor
+[0m[31mError al redirigir la entrada estandar en hijo: Bad file descriptor
+[0mtouch .aux2
+#0: "touch" using 1 argument/s
+ls -l .aux .aux2 .noexiste
+#0: "ls" using 4 argument/s
+ls: cannot access '.aux': No such file or directory
+ls: cannot access '.noexiste': No such file or directory
+ls: write error: Bad file descriptor
+/bin/kill -KILL 2468378
+#0: "/bin/kill" using 2 argument/s
++ '[' -f .aux2 ']'
++ : 'Cierto. Bien.'
++ rm -f .aux2
++ :
++ '[' -f .aux ']'
++ : Falso.
++ ERROR_GRAVE
++ : '########## ATENCIÓN ##########'
++ :
++ : 'El fichero ".aux" se ha borrado.'
++ : 'No se controla adecuadamente el posible error devuelto'
++ : 'por la llamada al sistema OPEN.'
++ : 'El Minishell debe detectar y tolerar los errores derivados'
++ : 'de un uso incorrecto por parte del usuario y debe avisarle'
++ : 'del error para permitirle que lo corrija.'
++ :
++ Redireccion_de_entrada_a_fichero_existente _____________________________
++ :
++ : '«««   Se debe abrir para lectura.   »»»'
++ :
++ Sincronizar
+touch .aux
+#0: "touch" using 1 argument/s
+echo rm .aux > .doit
+#0: "echo" using 2 argument/s
+sh < .doit
+#0: "sh" using 0 argument/s
+sh: 2: ORIGINAL: not found
+rm .aux
+#0: "rm" using 1 argument/s
+rm: cannot remove '.aux': No such file or directory
+ ORIGINAL -> 10, NOM:syntax error
+ .doit
+You hitted ctrl-D | bye!
+++ BROKEN_PIPE
+++ : '########## ATENCIÓN ##########'
+++ : 'Terminación anómala del Minishell.'
+++ :
+++ : 'Sólo debe terminar al llegar al EOF de su entrada estándar.'
+++ : 'No deben producirse señales como SIGBUS o SIGSEGV que le maten.'
+++ : 'No debe hacer EXIT ante errores provocados por el usuario.'
+++ :
+++ exit 10
++ case $NOTA in
++ : 10
++ : '*** ATENCIÓN ***'
++ : 'Para APROBAR LA PARTE PRACTICA de la asignatura       '
++ : 'es IMPRESCINDIBLE obtener como mínimo 4.5 puntos.     '
++ : 'Debe usted llegar a una media de 4.5 entre esta       '
++ : 'práctica y las demás (si las hubiera).                '
++ :
++ exit 10

@@ -286,6 +286,12 @@ int main(void)
 							errorPrint("Cerrando [READ_END] en HIJO");
 					}
 
+					//case bg
+					if(!bg){
+						signal(SIGINT, SIG_DFL);
+                        signal(SIGQUIT, SIG_DFL);
+					}
+
 					// Case: Normal execution
 					int ret_status = execvp(command[0], command);
 					// Catching the error message

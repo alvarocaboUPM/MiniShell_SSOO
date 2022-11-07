@@ -239,15 +239,15 @@ int main(void)
 				 ******************/
 				case 0:
 					// Case redirects: 
-					if(isFirst && hasRedirects == STDIN_FILENO
+					if(isFirst && filev[STDIN_FILENO]
 					&& redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
 						return errorPrint("Error al redirigir la entrada estandar en hijo");
 					
-					if(isLast && hasRedirects == STDOUT_FILENO 
+					if(isLast && filev[STDOUT_FILENO]
 					&& redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
 						return errorPrint("Error al redirigir la salida estandar en hijo");
 				 	
-					if(hasRedirects == STDERR_FILENO
+					if(filev[STDERR_FILENO]
 					&& redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
 						return errorPrint("Error al redirigir la salida de error estandar en hijo");
 
@@ -480,7 +480,6 @@ int redir(int i, char** filev, int *original){
 	if(fd < 3)
 		return errorPrint("No se pudo redirigir");
 	
-		
 	if (dup2(fd, i) < 0)
 		return errorPrint("Error en el dup2 de redir");
 

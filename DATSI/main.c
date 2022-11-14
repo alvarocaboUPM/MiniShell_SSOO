@@ -41,12 +41,12 @@
 #include <strings.h>
 #include <stdbool.h>
 #include <dirent.h>
-
 //Permisos open
 #define _GNU_SOURCE
 #include <fcntl.h>
 
 /******	Variables Globales	***/
+
 #define READ_END 0
 #define WRITE_END 1
 
@@ -61,16 +61,14 @@
 
 static pid_t PID;		   // Identificador de proceso
 static char CWD[MAX_PATH]; // Path de trabajo actual
-//static char *HOME;		   // Path del home
 
-/***Declaración de funciones*/
-
+//========DECLARACIÓN DE FUNCIONES
 extern int obtain_order(); /* See parser.y for description */
 int* countArgs(char ***argvv, int argvc);
-
 int redirHandler(char** filev);
 int redir(int i, char** filev, int* original);
 // Visuals
+
 void printWelcome();
 void PrintPromtCWD();
 int errorPrint(char *err);
@@ -83,6 +81,7 @@ int timeIC(char **argv, int argc);
 int umaskIC(char **argv, int argc);
 int readIC(char **argv, int argc);
 /*DEBUGGING*/
+
 void printIntArray(int *arr);
 void printCharArray(char *arr);
 int getArraySize(void *arr);
@@ -106,13 +105,13 @@ const static struct
 	{"read", readIC},
 };
 
-/*
-Mapa de flags de estado
-*/
+
+//Mapa de flags de estado
+
 static bool in_pipe= false;
 static bool isLast= false;
 static bool isFirst= false;
-static bool isIF= false;
+
 
 /******* Main ********/
 
@@ -140,7 +139,6 @@ int main(void)
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 
-
 	/*	BUFFERS E-S*/
 	setbuf(stdout, NULL); /* Unbuffered */
 	setbuf(stdin, NULL);
@@ -164,7 +162,7 @@ int main(void)
 		argvc = ret - 1; /* Line */
 		if (argvc == 0) continue; /* Empty line */
 
-#if 1
+	#if 1
 		/*YOU CAN COMMENT THIS SECTION BY SWITCHING THE IF*/
 		int *argcc = countArgs(argvv, argvc);
 		char **command = NULL;
@@ -382,6 +380,7 @@ int main(void)
 }
 
 /*FUNCIONES AUXILIARES*/
+
 void printWelcome()
 {
 	puts(
@@ -425,7 +424,7 @@ void okPrint(char *err)
 }
 
 /* Función que imprime el promt con la estructura
-   username@CWD$
+   username"@"CWD$
 */
 void PrintPromtCWD(char *CWD)
 {
@@ -509,8 +508,9 @@ int redir(int i, char** filev, int *original){
 }
 
 /* 
-   @param Array de comandos y su longitud
-   @return Número de argumentos de cada comando
+   @param argvv Array de comandos 
+   @param argvc Longitud del array
+   @return Númemo de argumentos de cada comando
 */
 int *countArgs(char ***argvv, int argvc)
 {
@@ -536,18 +536,22 @@ int *countArgs(char ***argvv, int argvc)
 /*INTERNAL COMMANDS SELECT AND IMPLEMENTATION*/
 
 /*
-	@param Command name, arguments and arguments.length
-	@result Execution of the proper internal function
+	@param argvv Array de comandos 
+    @param argvc Longitud del array
+	@param redirs 3 posibles nombres de archivos para redirigir 
+    @param status Dirección de memoria que guarda la salida del programa
+	@result 0 En caso de éxito
+	@exception -1 en caso de que no sea un comando interno válido
+
 */
 int exeIC(char **argv, int argc, char** redirs, int *status){
 
-	int redAt = redirHandler(redirs), og=0;
+	int redAt = redirHandler(redirs), og;
 
 	for (int i = 0; i < 4; i++)
 	{
 		if (!strcmp(function_map[i].name, argv[0]) && function_map[i].func)
 		{
-			isIF=true;
 			// Ejecuta la función
 			if(redAt > -1 && redir(redAt, redirs, &og)!=redAt)
 				errorPrint("Error en la redirección");
@@ -719,6 +723,7 @@ void printFlags(){
 	printf("isLast->%s\n", isLast ? "true" : "false");
 	printf("in_pipe %s\n", in_pipe ? "true" : "false");
 }
+
 char* printRedir(int redir){
 	char* result;
 	switch (redir)

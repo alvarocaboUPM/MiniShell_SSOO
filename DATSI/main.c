@@ -30,7 +30,6 @@
 #include <stddef.h> /* NULL */
 #include <stdio.h>	/* setbuf, printf */
 #include <stdlib.h>
-// v1
 #include <signal.h> //Handlers de señales
 #include <unistd.h> //PID operations
 #include <pwd.h>
@@ -42,6 +41,7 @@
 #include <strings.h>
 #include <stdbool.h>
 #include <dirent.h>
+
 //Permisos open
 #define _GNU_SOURCE
 #include <fcntl.h>
@@ -67,6 +67,7 @@ static char CWD[MAX_PATH]; // Path de trabajo actual
 
 extern int obtain_order(); /* See parser.y for description */
 int* countArgs(char ***argvv, int argvc);
+
 int redirHandler(char** filev);
 int redir(int i, char** filev, int* original);
 // Visuals
@@ -76,7 +77,7 @@ int errorPrint(char *err);
 void warningPrint(char *err);
 void okPrint(char *err);
 
-int exeIC(char **argv, int argc, char ** redirs);
+int exeIC(char **argv, int argc, char ** redirs, int* status);
 int cdIC(char **argv, int argc);
 int timeIC(char **argv, int argc);
 int umaskIC(char **argv, int argc);
@@ -111,6 +112,7 @@ Mapa de flags de estado
 static bool in_pipe= false;
 static bool isLast= false;
 static bool isFirst= false;
+static bool isIF= false;
 
 /******* Main ********/
 
@@ -130,9 +132,14 @@ int main(void)
 	PID = getpid(); // PID de la shell
 
 	/*	SIGNALS	*/
-	signal(SIGKILL, SIG_IGN); // Kill Process
-	signal(SIGINT, SIG_IGN);  // Ctrl+C
-	signal(SIGQUIT, SIG_IGN); // Ctrl+shitft+\ 
+	struct sigaction sa;
+	sa.sa_flags=0;
+	sa.sa_handler=SIG_IGN;
+
+	//Ignored signals
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT, &sa, NULL);
+
 
 	/*	BUFFERS E-S*/
 	setbuf(stdout, NULL); /* Unbuffered */
@@ -150,7 +157,7 @@ int main(void)
 		ret = obtain_order(&argvv, filev, &bg);
 		if (ret == 0) /* EOF */
 		{
-			fprintf(stderr, "\nYou hitted ctrl-D | bye!\n");
+			fprintf(stderr, "\nBye!\n");
 			break;
 		}
 		if (ret == -1) continue;	 /* Syntax error */
@@ -226,142 +233,148 @@ int main(void)
 
 			/*Now we have to discriminate wether the command is
 				internal or is located in /usr/bin: */
+			int* ret_status=malloc(sizeof(int));
 
-			if(exeIC(command, n_args, filev)==-1){
-				pid_t pid;
-				switch (pid = fork())
+			if(!bg && isLast && 
+			exeIC(command, n_args, filev, ret_status)==0)
+				continue;
+
+			pid_t pid;
+			switch (pid = fork())
+			{
+			case -1:
+				errorPrint("fork");
+				break;
+			/*****************
+			 *	 HIJO		 *
+			******************/
+			case 0:
+				// Case redirects: 
+				if(isFirst && filev[STDIN_FILENO]
+				&& redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
+					return errorPrint("Error al redirigir la entrada estandar en hijo");
+				
+				if(isLast && filev[STDOUT_FILENO]
+				&& redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
+					return errorPrint("Error al redirigir la salida estandar en hijo");
+				
+				if(filev[STDERR_FILENO]
+				&& redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
+					return errorPrint("Error al redirigir la salida de error estandar en hijo");
+
+				//Case bg; do not ignore signals if not bg
+				if(!bg){
+					sa.sa_handler=SIG_DFL;
+					sigaction(SIGINT, &sa, NULL);
+					sigaction(SIGQUIT, &sa, NULL);
+				}
+
+				// Case: Pipe requested (ESCRITORES)
+				if (in_pipe)
 				{
-				case -1:
-					errorPrint("fork");
-					break;
-				/*****************
-				 *	 HIJO		 *
-				 ******************/
-				case 0:
-					// Case redirects: 
-					if(isFirst && filev[STDIN_FILENO]
-					&& redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
-						return errorPrint("Error al redirigir la entrada estandar en hijo");
-					
-					if(isLast && filev[STDOUT_FILENO]
-					&& redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
-						return errorPrint("Error al redirigir la salida estandar en hijo");
-				 	
-					if(filev[STDERR_FILENO]
-					&& redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
-						return errorPrint("Error al redirigir la salida de error estandar en hijo");
-
-					// Case: Pipe requested (ESCRITORES)
-					if (in_pipe)
+					if (!isLast)
 					{
-						if (!isLast)
-						{
-							char *mess = malloc(50);
-							sprintf(mess, "Using pipe @ process %s -> : %d\n", command[0], getpid());
-							warningPrint(mess);
-						}
-
-						// Solo manejamos el fd en uso
-						if (inuse_fd != 0)
-						{
-							// try dup2(inuse_fd) -> Stdin
-							if (dup2(inuse_fd, STDIN_FILENO) < 0)
-								errorPrint("dup 2[HIJO] -> STDIN");
-							if (!isLast && (close(inuse_fd) < 0))
-								// Si es el último intentamos cerrar
-								errorPrint("Pipe cerrada antes de acabar");
-						}
-						if (m_pipe[WRITE_END] != STDOUT_FILENO)
-						{
-							if (!isLast && dup2(m_pipe[WRITE_END], STDOUT_FILENO) < 0)
-								errorPrint("dup 2[HIJO] -> STDOUT"); // stdout -> pipe
-						}
-						if (inuse_fd != STDIN_FILENO && close(inuse_fd) < 0)
-							errorPrint("closing last_pipe_fd when != STDIN_FILENO (0)");
-
-						// Tries para cerrar el pipe
-						if (close(m_pipe[WRITE_END]) < 0)
-							errorPrint("Cerrando [WRITE_END] en HIJO");
-						if (close(m_pipe[READ_END]) < 0)
-							errorPrint("Cerrando [READ_END] en HIJO");
+						char *mess = malloc(50);
+						sprintf(mess, "Using pipe @ process %s -> : %d\n", command[0], getpid());
+						warningPrint(mess);
 					}
 
-					//case bg
-					if(!bg){
-						signal(SIGINT, SIG_DFL);
-                        signal(SIGQUIT, SIG_DFL);
-					}
-
-					// Case: Normal execution
-					int ret_status = execvp(command[0], command);
-					// Catching the error message
-					if (ret_status != 0)
+					// Solo manejamos el fd en uso
+					if (inuse_fd != 0)
 					{
-						char *error_message = malloc(50);
-						sprintf(error_message, "'%s' exited, status(%d)", command[0], ret_status);
-						errorPrint(error_message);
-						free(error_message);
+						// try dup2(inuse_fd) -> Stdin
+						if (dup2(inuse_fd, STDIN_FILENO) < 0)
+							errorPrint("dup 2[HIJO] -> STDIN");
+						if (!isLast && (close(inuse_fd) < 0))
+							// Si es el último intentamos cerrar
+							errorPrint("Pipe cerrada antes de acabar");
 					}
-					//break; //No hace falta break pq exec termina el proceso hijo 
+					if (m_pipe[WRITE_END] != STDOUT_FILENO)
+					{
+						if (!isLast && dup2(m_pipe[WRITE_END], STDOUT_FILENO) < 0)
+							errorPrint("dup 2[HIJO] -> STDOUT"); // stdout -> pipe
+					}
+					if (inuse_fd != STDIN_FILENO && close(inuse_fd) < 0)
+						errorPrint("closing last_pipe_fd when != STDIN_FILENO (0)");
+
+					// Tries para cerrar el pipe
+					if (close(m_pipe[WRITE_END]) < 0)
+						errorPrint("Cerrando [WRITE_END] en HIJO");
+					if (close(m_pipe[READ_END]) < 0)
+						errorPrint("Cerrando [READ_END] en HIJO");
+				}
+
+				// Case: Normal execution
+				if(exeIC(command, n_args, filev, ret_status)==-1){
+					*ret_status = execvp(command[0], command);
+				}
+				// Catching the error message
+				if (*ret_status != 0)
+				{
+					char *error_message = malloc(50);
+					sprintf(error_message, "'%s' exited, status(%d)", command[0], *ret_status);
+					errorPrint(error_message);
+					free(error_message);
+				}
+				exit(1);
+				break;
 
 				/***************
-				 *	 PADRE		 *
-				 ****************/
-				default:
-					// Case: Pipe requested (LECTOR)
-					if (in_pipe)
-					{
-						if (close(inuse_fd) < 0)
-							errorPrint("Cerrando el [WRITE_END] no cerrado del hijo");
-						if (isLast)
-						{
-							// Restauramos la entrada estandar
-							dup2(stdin_copy, STDIN_FILENO);
-							//printf("STDIN_COPY -> %d\n", stdin_copy);
-							close(stdin_copy);
-						}
-						else
-							//Duplicamos en un nuevo fd el lado lector
-							inuse_fd = dup(m_pipe[READ_END]);
-					
-						// try closing both ends
-						if (close(m_pipe[WRITE_END]) < 0)
-							errorPrint("Cerrando [WRITE_END] en padre");
-						if (close(m_pipe[READ_END]) < 0)
-							errorPrint("Cerrando [READ_END] en padre");
-					}
+				 *	 PADRE	   *
+				 ***************/
 
-					if(isLast){
-						if (!bg){	
-							int ret_status;
-							/*Supendemos padre hasta que Hijo.status -> Terminated
-								sin fijarnos en el return status del hijo
-							*/
-							while (pid != wait(&ret_status)) 
-										continue;
-							
-							char stat_str[4];
-                            sprintf(stat_str, "%d", ret_status);
-                            setenv("status", stat_str, 1);		
-						}
-						else{
-							bg_Pid = pid;
-							fprintf(stdout, "[%d]\n", pid);
-							char backgr_pid_str[7];
-							sprintf(backgr_pid_str, "%d", bg_Pid);
-							setenv("bgpid", backgr_pid_str, 1);
-						}
+			default:
+				// Case: Pipe requested (LECTOR)
+				if (in_pipe)
+				{
+					if (close(inuse_fd) < 0)
+						errorPrint("Cerrando el [WRITE_END] no cerrado del hijo");
+					if (isLast)
+					{
+						// Restauramos la entrada estandar
+						dup2(stdin_copy, STDIN_FILENO);
+						//printf("STDIN_COPY -> %d\n", stdin_copy);
+						close(stdin_copy);
+					}
+					else
+						//Duplicamos en un nuevo fd el lado lector
+						inuse_fd = dup(m_pipe[READ_END]);
+				
+					// try closing both ends
+					if (close(m_pipe[WRITE_END]) < 0)
+						errorPrint("Cerrando [WRITE_END] en padre");
+					if (close(m_pipe[READ_END]) < 0)
+						errorPrint("Cerrando [READ_END] en padre");
+				}
+
+				if(isLast){
+					if (!bg){	
+						int ret_status;
+						/*Supendemos padre hasta que Hijo.status -> Terminated
+							sin fijarnos en el return status del hijo
+						*/
+						while (pid != wait(&ret_status)) 
+						continue;
+						
+						char stat_str[4];
+						sprintf(stat_str, "%d", ret_status); //toString
+						setenv("status", stat_str, 1);		
+					}
+					else{
+						bg_Pid = pid;
+						fprintf(stdout, "[%d]\n", pid);
+						char backgr_pid_str[7];
+						sprintf(backgr_pid_str, "%d", bg_Pid);
+						setenv("bgpid", backgr_pid_str, 1);
 					}
 				}
-				//Restaura los redirects
-				if(isLast && hasRedirects!=-1){
-				 //restore
-				 dup2(original, hasRedirects);
 			}
+			//Restaura los redirects
+			if(isLast && hasRedirects!=-1){
+				//restore
+				dup2(original, hasRedirects);
 		}
-			// Si el command introducido no está en usr/bin o no está
-			// implementado en la shell, saltará un error de no implementado
-		}
+	}
 #endif
 	}
 	exit(0);
@@ -526,7 +539,7 @@ int *countArgs(char ***argvv, int argvc)
 	@param Command name, arguments and arguments.length
 	@result Execution of the proper internal function
 */
-int exeIC(char **argv, int argc, char** redirs){
+int exeIC(char **argv, int argc, char** redirs, int *status){
 
 	int redAt = redirHandler(redirs), og=0;
 
@@ -534,10 +547,11 @@ int exeIC(char **argv, int argc, char** redirs){
 	{
 		if (!strcmp(function_map[i].name, argv[0]) && function_map[i].func)
 		{
+			isIF=true;
 			// Ejecuta la función
 			if(redAt > -1 && redir(redAt, redirs, &og)!=redAt)
 				errorPrint("Error en la redirección");
-			function_map[i].func(argv, argc);
+			*status= function_map[i].func(argv, argc);
 			dup2(og, redAt);
 			return 0;
 		}
@@ -557,11 +571,13 @@ int exeIC(char **argv, int argc, char** redirs){
 int cdIC(char **argv, int argc)
 {
 	char *dir;
+	printf("ARG-> %s\n",argv[1]);
 
 	switch (argc)
 	{
 	case 0:
 		/* dir = $HOME */
+		
 		dir = getenv("HOME");
 		break;
 	case 1:
@@ -572,10 +588,20 @@ int cdIC(char **argv, int argc)
 		return -1;
 	}
 
+	if(PID!=getpid()){
+		warningPrint("ATENCIÓN: La función se ejecuta en un subshell\n");
+	}
+
 	// Check for permisions and other errors when we changhe $PWD
 	if (chdir(dir) == 0)
-	{
+	{	
+		//get CWD again
+		if(!getcwd(CWD, MAX_PATH)){
+			errorPrint("Error al obtener el dir actual");
+			return -3; 
+		}
 		fprintf(stdout, "%s\n", CWD);
+		return 0;
 	}
 	else
 	{
@@ -588,6 +614,7 @@ int timeIC(char **argv, int argc)
 
 	return -1;
 }
+
 int umaskIC(char **argv, int argc)
 {
 	mode_t current_mask, new_mask;
@@ -599,8 +626,11 @@ int umaskIC(char **argv, int argc)
 		current_mask = umask(022); // change it to whatever but save the old one on return
 		umask(current_mask);	   // change it back
 		fprintf(stdout, "%o\n", current_mask);
-		break;
-	case 1:; // Solves a label error
+		return 0;
+
+	case 1:
+		;
+		// DONT REMOVE Solves a label error
 		char *error;
 		new_mask = (mode_t)strtol(argv[1], &error, 8);
 		printf("%s", error);
@@ -614,7 +644,7 @@ int umaskIC(char **argv, int argc)
 			errorPrint("Please imput a valid Base-8 number");
 			return -1;
 		}
-		break;
+		return 0;
 
 	default:
 		errorPrint("Cant have more than 1 argument for 'Umask'");

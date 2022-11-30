@@ -132,10 +132,12 @@ int main(void)
 
 	/*	SIGNALS	*/
 	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
 	sa.sa_flags=0;
 	sa.sa_handler=SIG_IGN;
 
 	//Ignored signals
+	
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
 
@@ -172,7 +174,7 @@ int main(void)
 		in_pipe = argvc > 1;
 
 		// Adding pipes
-		int m_pipe[2];
+		int fd[2];
 		int inuse_fd;
 		int stdin_copy;
 
@@ -226,7 +228,7 @@ int main(void)
 			}
 
 			// Checks if a piredirGetterpe has been requested, if so, it trys to create it
-			if (in_pipe && pipe(m_pipe) < 0)
+			if (in_pipe && pipe(fd) < 0)
 				errorPrint("No se ha podido crear el pipe");
 
 			/*Now we have to discriminate wether the command is
@@ -278,27 +280,27 @@ int main(void)
 					}
 
 					// Solo manejamos el fd en uso
-					if (inuse_fd != 0)
+					if (inuse_fd != STDIN_FILENO)
 					{
 						// try dup2(inuse_fd) -> Stdin
 						if (dup2(inuse_fd, STDIN_FILENO) < 0)
 							errorPrint("dup 2[HIJO] -> STDIN");
 						if (!isLast && (close(inuse_fd) < 0))
-							// Si es el último intentamos cerrar
+							// Cerramos el descriptor porque hemos acabado con él
 							errorPrint("Pipe cerrada antes de acabar");
 					}
-					if (m_pipe[WRITE_END] != STDOUT_FILENO)
+					if (fd[WRITE_END] != STDOUT_FILENO)
 					{
-						if (!isLast && dup2(m_pipe[WRITE_END], STDOUT_FILENO) < 0)
+						if (!isLast && dup2(fd[WRITE_END], STDOUT_FILENO) < 0)
 							errorPrint("dup 2[HIJO] -> STDOUT"); // stdout -> pipe
 					}
 					if (inuse_fd != STDIN_FILENO && close(inuse_fd) < 0)
 						errorPrint("closing last_pipe_fd when != STDIN_FILENO (0)");
 
 					// Tries para cerrar el pipe
-					if (close(m_pipe[WRITE_END]) < 0)
+					if (close(fd[WRITE_END]) < 0)
 						errorPrint("Cerrando [WRITE_END] en HIJO");
-					if (close(m_pipe[READ_END]) < 0)
+					if (close(fd[READ_END]) < 0)
 						errorPrint("Cerrando [READ_END] en HIJO");
 				}
 
@@ -331,17 +333,16 @@ int main(void)
 					{
 						// Restauramos la entrada estandar
 						dup2(stdin_copy, STDIN_FILENO);
-						//printf("STDIN_COPY -> %d\n", stdin_copy);
 						close(stdin_copy);
 					}
 					else
 						//Duplicamos en un nuevo fd el lado lector
-						inuse_fd = dup(m_pipe[READ_END]);
+						inuse_fd = dup(fd[READ_END]);
 				
 					// try closing both ends
-					if (close(m_pipe[WRITE_END]) < 0)
+					if (close(fd[WRITE_END]) < 0)
 						errorPrint("Cerrando [WRITE_END] en padre");
-					if (close(m_pipe[READ_END]) < 0)
+					if (close(fd[READ_END]) < 0)
 						errorPrint("Cerrando [READ_END] en padre");
 				}
 
@@ -621,39 +622,35 @@ int timeIC(char **argv, int argc)
 
 int umaskIC(char **argv, int argc)
 {
-	mode_t current_mask, new_mask;
+	mode_t tmp_mask, new_mask;
 	// Args control
 	switch (argc)
 	{
 	case 0:
 		// Prints current umask
-		current_mask = umask(022); // change it to whatever but save the old one on return
-		umask(current_mask);	   // change it back
-		fprintf(stdout, "%o\n", current_mask);
-		return 0;
-
+		tmp_mask = umask(0); // change it to whatever but save the old one on return
+		umask(tmp_mask);	  // change it back
+		fprintf(stdout, "%o\n", tmp_mask);
+		break;
 	case 1:
-		;
-		// DONT REMOVE Solves a label error
+		; // DONT REMOVE Solves a label error
 		char *error;
 		new_mask = (mode_t)strtol(argv[1], &error, 8);
-		printf("%s", error);
-		if (*error == '\0')
-		{
-			umask(new_mask);
-			printf("%o\n", new_mask);
-		}
-		else
-		{
-			errorPrint("Please imput a valid Base-8 number");
+		
+		if (*error != '\0'){
+			errorPrint(strcat(error, "	Please imput a valid Base-8 number"));
 			return -1;
 		}
-		return 0;
+		tmp_mask=umask(new_mask);
+		//printf("0%03o -> 0%03o\n", tmp_mask, new_mask);
+		printf("%o", new_mask);
+		break;
 
 	default:
 		errorPrint("Cant have more than 1 argument for 'Umask'");
 		return -1;
 	}
+  return 0;
 }
 
 int readIC(char **argv, int argc)
@@ -704,7 +701,6 @@ int getFDsOpen()
 	if (dp == NULL)
 		return -1;
 
-	//char buffer = malloc(1000);
 	while ((de = readdir(dp)) != NULL)
 	{
 		if (count >= 0){

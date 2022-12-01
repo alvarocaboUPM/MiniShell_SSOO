@@ -576,13 +576,11 @@ int exeIC(char **argv, int argc, char** redirs, int *status){
 int cdIC(char **argv, int argc)
 {
 	char *dir;
-	printf("ARG-> %s\n",argv[1]);
 
 	switch (argc)
 	{
 	case 0:
 		/* dir = $HOME */
-		
 		dir = getenv("HOME");
 		break;
 	case 1:

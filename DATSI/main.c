@@ -487,8 +487,8 @@ int redir(int i, char** filev, int *original){
 	if(i == STDIN_FILENO){
 		fd = open(filev[i], O_RDONLY, 0666); //Solo leemos
 	}else{
-		fd = creat(filev[i], S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-		//fd = open(filev[i], O_CREAT | O_TRUNC | O_WRONLY, 0666);
+		//fd = creat(filev[i], S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+		fd = open(filev[i], O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	}
 	
 	*original = dup(i); //Duplicamos para poder restaurar
@@ -537,8 +537,8 @@ int *countArgs(char ***argvv, int argvc)
 /*INTERNAL COMMANDS SELECT AND IMPLEMENTATION*/
 
 /*
-	@param argvv Array de comandos 
-    @param argvc Longitud del array
+	@param argv Array de comandos 
+    @param argc Numero de argumentos
 	@param redirs 3 posibles nombres de archivos para redirigir 
     @param status Dirección de memoria que guarda la salida del programa
 	@result 0 En caso de éxito
@@ -569,8 +569,8 @@ int exeIC(char **argv, int argc, char** redirs, int *status){
 	closest implementation for this minishell */
 
 /*
-	@param [dir] (argc <=2)
-	if length(argv) == 1 -> dir = $HOME
+	@param [dir] (argc <=2) 
+		if length(argv) == 1 -> dir = $HOME
 	@return 0 if $PWD changed, -1 otherwise
 */
 int cdIC(char **argv, int argc)
@@ -636,7 +636,7 @@ int umaskIC(char **argv, int argc)
 		new_mask = (mode_t)strtol(argv[1], &error, 8);
 		
 		if (*error != '\0'){
-			errorPrint(strcat(error, "	Please imput a valid Base-8 number"));
+			errorPrint(strcat(error, "Please imput a valid Base-8 number"));
 			return -1;
 		}
 		tmp_mask=umask(new_mask);

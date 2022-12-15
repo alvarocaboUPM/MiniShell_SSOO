@@ -75,7 +75,7 @@ int *countArgs(char ***argvv, int argvc);
 void metacharsHandler(char* command[], int n_args);
 int metaUser(char* cursor);
 int metaVar(char* cursor);
-int followsFormat(char *possible);
+int followsFormat(char *pos);
 int redirHandler(char **filev);
 int redir(int i, char **filev, int *original);
 // Visuals
@@ -481,7 +481,6 @@ void PrintPromtCWD(char *CWD)
 		{
 			strcat(prompt, p);
 			strcat(prompt, "/");
-			// printf(stderr, "\nP: %s\tPROMT: %s ", p, prompt);
 		}
 		p = strtok(NULL, "/");
 		i++;
@@ -535,7 +534,6 @@ int *countArgs(char ***argvv, int argvc)
 void metacharsHandler(char* command[], int n_args){
 	for (int i=1;i==n_args;i++)
 	{
-		//printf("Command -> %s", command[i]);
 		if(command[i][0]=='~' && metaUser(command[i])<0) return;
 		if(strchr(command[i], '$')!= NULL && metaVar(command[i])<0) return;
 	}
@@ -569,23 +567,26 @@ int metaUser(char* cursor){
 }
 
 int metaVar(char* cursor){
-	char *possible = strchr(cursor, '$') + 1;
-	char *resulting = "\0";
-	int offset = possible - cursor - 1;
-	// check if possible is further into the string than command[n_arg]
+
+	char *pos = strchr(cursor, '$') + 1;
+	char *res = malloc(sizeof(char));
+	res[0]='\0';
+
+	int offset = pos - cursor - 1;
+	// check if pos is further into the string than command[n_arg]
 	if (offset != 0) {
-		strncat(resulting, cursor, offset);
+		strncat(res, cursor, offset);
 	}
 	int var_size;
 	//Check format
-	if (!(var_size=followsFormat(possible))) {
+	if (!(var_size=followsFormat(pos))) {
 		errorPrint("Given user doesn't follow format");
 		return -1;
 	}
 	//Allocating memory for expanding var
 	char *var = malloc(sizeof(char)*var_size);
-	//Copying possible name @ var
-	strncpy(var, possible, var_size);
+	//Copying pos name @ var
+	strncpy(var, pos, var_size);
 	var[var_size] = '\0';
 
 	//Retriving it from enviromment
@@ -594,16 +595,22 @@ int metaVar(char* cursor){
 		errorPrint("variable no definida");
 		return -1;
 	}
+	strcat(res, var_value);
+	//Concatenate the rest of the command
+	offset = strlen(pos) - strlen(var);
+	if(offset>0){
+		strncat(res, (pos+strlen(var)), offset);
+	}
+	
 
-	strcpy(cursor, var_value);
-	//printf("VAR -> %s\n", var_value);
+	strcpy(cursor, res);
 	free(var);
     return 0;
 }
 
-int followsFormat(char *possible) {
+int followsFormat(char *pos) {
 	int follows_format; char * format = "%*[_a-zA-Z0-9]%n";
-    sscanf(possible, format , &follows_format);
+    sscanf(pos, format , &follows_format);
 	return follows_format;
 }
 
@@ -648,15 +655,12 @@ int redir(int i, char **filev, int *original)
 	}
 	else
 	{
-		// fd = creat(filev[i], S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		fd = open(filev[i], O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	}
 
 	*original = dup(i); // Duplicamos para poder restaurar
 
-	// Control errores 1
-	// printf("FD -> %d, ORIGINAL -> %d, NOM: %s\n", fd, *original, filev[i]);
-
+	// Control de errores
 	if (fd < 3)
 		return errorPrint("No se pudo redirigir");
 

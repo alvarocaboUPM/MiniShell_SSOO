@@ -72,10 +72,10 @@ static char CWD[MAX_PATH]; // Path de trabajo actual
 
 extern int obtain_order(); /* See parser.y for description */
 int *countArgs(char ***argvv, int argvc);
-void metacharsHandler(char* command[], int n_args);
+void metacharsHandler(char* command[]);
 int metaUser(char* cursor);
 int metaVar(char* cursor);
-int followsFormat(char *pos);
+int followsFormat(char *pos, int* follows_format) ;
 int redirHandler(char **filev);
 int redir(int i, char **filev, int *original);
 // Visuals
@@ -132,7 +132,6 @@ static bool isFirst = false;
 
 // Estructuras de timing
 static clock_t TIME;
-static struct tms TIME_STAT;
 
 /******* Main ********/
 
@@ -149,32 +148,35 @@ int main(void)
 	int bg_Pid = 0; // PID de la función de bg
 	PID = getpid(); // PID de la shell
 
-	/*	SIGNALS	*/
+	//SIGNALS
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
 	sa.sa_handler = SIG_IGN;
 
 	// Ignored signals
-
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
+	//Acciones provocadas por el usuario
+	sigaction(SIGBUS, &sa, NULL);
+	sigaction(SIGSEGV, &sa, NULL);
 
-	/*	BUFFERS E-S*/
+	//BUFFERS E-S
 	setbuf(stdout, NULL); /* Unbuffered */
 	setbuf(stdin, NULL);
 
 	// Welcome message
 	printWelcome();
 
-	start_clock(); // Guarda el momento de inicio del minishell
+	// Guarda el momento de inicio del minishell
+	start_clock(); 
 
 	/* BUCLE INFINITO*/
 	while (1)
 	{
 		// Necesitamos obtener el dir y el PID del calling process
 		getcwd(CWD, sizeof(CWD));
-
+		//Promt
 		printf("\nmsh> ");
 		ret = obtain_order(&argvv, filev, &bg);
 		if (ret == 0) /* EOF */
@@ -190,6 +192,7 @@ int main(void)
 
 #if 1
 		/*YOU CAN COMMENT THIS SECTION BY SWITCHING THE IF*/
+
 		int *argcc = countArgs(argvv, argvc);
 		char **command = NULL;
 		int atCommand = 0; // Numero de comandos registrados
@@ -242,7 +245,7 @@ int main(void)
 					" ");
 #endif
 			//Metachars
-			metacharsHandler(command, n_args);
+			metacharsHandler(command);
 
 			// Catch null
 			if (command == NULL)
@@ -255,14 +258,14 @@ int main(void)
 				continue;
 			}
 
-			// Checks if a piredirGetterpe has been requested, if so, it trys to create it
+			// Checks if a pipe has been requested, if so, it trys to create it
 			if (in_pipe && pipe(fd) < 0)
 				errorPrint("No se ha podido crear el pipe");
 
 			/*Now we have to discriminate wether the command is
 				internal or is located in /usr/bin: */
-			int *ret_status = malloc(sizeof(int));
 
+			int *ret_status = malloc(sizeof(int));
 			if (!bg && isLast &&
 				exeIC(command, n_args, filev, ret_status) == 0)
 				continue;
@@ -336,7 +339,7 @@ int main(void)
 				// Case: Normal execution
 				if (exeIC(command, n_args, filev, ret_status) == -1)
 				{
-					*ret_status = execvp(command[0], command);
+					*ret_status = execvp((const char*)command[0], (char *const *)command);
 				}
 				// Catching the error message
 				if (*ret_status != 0)
@@ -504,7 +507,7 @@ void PrintPromtCWD(char *CWD)
  */
 int *countArgs(char ***argvv, int argvc)
 {
-	int *res = malloc(argvc);
+	int *res = malloc(sizeof(int)*argvc);
 	int i = 0;
 
 	while (argvv[i] != NULL)
@@ -528,23 +531,30 @@ int *countArgs(char ***argvv, int argvc)
  * and 'translates' them to a valid path or argument for the minishell
  * 
  * @param argv Input command
- * @param n_args Number of arguments detected
- * 
  */
-void metacharsHandler(char* command[], int n_args){
-	for (int i=1;i==n_args;i++)
+void metacharsHandler(char* command[]){
+
+	for (int i=1;command[i];i++)
 	{
+		//printf("C-> %s\n", command[i]);
 		if(command[i][0]=='~' && metaUser(command[i])<0) return;
 		if(strchr(command[i], '$')!= NULL && metaVar(command[i])<0) return;
 	}
 }
 
+/**
+ * @brief 
+ * 
+ * @param cursor 
+ * @return 0 if found | -1 for error  
+ */
 int metaUser(char* cursor){
 	char*possible_user = cursor+1; //Quitamos el '~'
 	// no user given, use the current user
-	if (possible_user[0] == '\0') strcpy(possible_user,getenv("USER"));
+	if (possible_user[0] == '\0') 
+	strcpy(possible_user,getenv("USER"));
 	
-	if (!followsFormat(possible_user)) {
+	if (!followsFormat(possible_user, NULL)) {
 		errorPrint("Given user doesn't follow format");
 		return -1;
 	}
@@ -554,7 +564,7 @@ int metaUser(char* cursor){
 		errno = EINVAL;
 		// make a formatted error message
 		char *error_message = malloc(sizeof(char) * (strlen(possible_user) + strlen("No existe el usuario ") + 1));
-		strcpy(error_message, "No existe el usuario: ");
+		strcpy(error_message, "No existe el usuario -> ");
 		strcat(error_message, possible_user);
 		errorPrint(error_message);
 		return -1;
@@ -566,52 +576,70 @@ int metaUser(char* cursor){
 	return 0;
 }
 
+/**
+ * @brief Swaps the given command with the env
+ * variable value
+ * 
+ * @param cursor 
+ * @return 0 if found | 1 if not found | -1 for error 
+ */
 int metaVar(char* cursor){
+	
+	char *pos;
+	if((pos = strchr(cursor, '$') + 1) == NULL){
+		return 1;
+	}
 
-	char *pos = strchr(cursor, '$') + 1;
-	char *res = malloc(sizeof(char));
+	char *res = malloc(sizeof(char)*MAX_PATH);
 	res[0]='\0';
-
+	
 	int offset = pos - cursor - 1;
+
 	// check if pos is further into the string than command[n_arg]
 	if (offset != 0) {
 		strncat(res, cursor, offset);
 	}
 	int var_size;
 	//Check format
-	if (!(var_size=followsFormat(pos))) {
+	if (!(followsFormat(pos, &var_size))) {
 		errorPrint("Given user doesn't follow format");
 		return -1;
 	}
+
 	//Allocating memory for expanding var
 	char *var = malloc(sizeof(char)*var_size);
+	var[var_size] = '\0';
 	//Copying pos name @ var
 	strncpy(var, pos, var_size);
-	var[var_size] = '\0';
-
+	
 	//Retriving it from enviromment
 	char *var_value = getenv(var);
 	if (var_value == NULL) {
-		errorPrint("variable no definida");
+		errorPrint("Variable de entorno undefined");
 		return -1;
 	}
 	strcat(res, var_value);
+
 	//Concatenate the rest of the command
 	offset = strlen(pos) - strlen(var);
 	if(offset>0){
 		strncat(res, (pos+strlen(var)), offset);
 	}
-	
 
 	strcpy(cursor, res);
 	free(var);
+	free(res); 
     return 0;
 }
 
-int followsFormat(char *pos) {
-	int follows_format; char * format = "%*[_a-zA-Z0-9]%n";
-    sscanf(pos, format , &follows_format);
-	return follows_format;
+int followsFormat(char *pos, int* follows_format) {
+	if(follows_format==NULL){
+		follows_format = malloc(sizeof(int));
+	} 
+	char * format = "%*[_a-zA-Z0-9]%n";
+    sscanf(pos, format , follows_format);
+	return *follows_format;
+
 }
 
 /*===========REDIRECTS============*/
@@ -710,11 +738,13 @@ int exeIC(char **argv, int argc, char **redirs, int *status)
 /* Used the --help section of these command to complete the
 	closest implementation for this minishell */
 
-/*
-	@param [dir] (argc <=2)
-		if length(argv) == 1 -> dir = $HOME
-	@return 0 if $PWD changed, -1 otherwise
-*/
+/**
+ * @brief 
+ *	
+ * @param [dir] (argc <=2)
+ *		if length(argv) == 1 -> dir = $HOME
+ * @return 0 if $PWD changed, -1 otherwise
+ */
 int cdIC(char **argv, int argc)
 {
 	char *dir;
@@ -811,7 +841,7 @@ int timeIC(char **argv, int argc)
  */
 void start_clock()
 {
-	TIME = times(&TIME_STAT);
+	TIME = times(NULL);
 }
 
 /**
@@ -915,7 +945,7 @@ int readIC(char **argv, int argc)
 
 void printIntArray(int *arr)
 {
-	puts("\nPriting Int array: \n");
+	warningPrint("\nPriting int array -> ");
 	int i, x;
 	printf("[");
 
@@ -929,15 +959,15 @@ void printIntArray(int *arr)
 
 void printCharArray(char *arr)
 {
-	puts("\nPriting Char array: \n");
-	int i;
-	printf("[");
+	warningPrint("\nPriting Char array -> ");
+	int i; char c;
+	printf("%c",'"');
 
-	for (i = 0; i < sizeof(arr); i++)
+	for (i = 0; (c=arr[i]); i++)
 	{
-		printf("%c, ", arr[i]);
+		printf("%c", c);
 	}
-	printf("]\n");
+	printf("%c\n",'"');
 }
 
 int getFDsOpen()

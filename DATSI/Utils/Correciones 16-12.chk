@@ -3,7 +3,7 @@
 + : '	 "Corrector de la práctica del Minishell. Versión 4.5.3"'
 + : '	 "Copyright © 1993-2020 Francisco Rosales «frosal@fi.upm.es»"'
 + :
-+ : '	 FECHA: "Thu Dec 15 12:08:49 CET 2022"'
++ : '	 FECHA: "Fri Dec 16 21:04:08 CET 2022"'
 + : '	 GRUPO: "c200172"'
 + : '	 AUTORES: "c200172; alvaro.cabo@alumnos.upm.es; Álvaro Cabo Ciudad"'
 + :
@@ -120,9 +120,9 @@ gcc -Wall -g  -o msh parser.o scanner.o main.o
 + : 'Su Minishell debe aceptar líneas en blanco y mandatos simples'
 + : 'y debe terminar limpiamente cuando se cierre su entrada estándar.'
 + :
-+ MSHPID=2901632
++ MSHPID=3345600
 + ./msh
-+ wait 2901632
++ wait 3345600
  __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ __   __   _______ ___    __   __ _______ ______   _______ 
 |  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
 |       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
@@ -173,7 +173,7 @@ Bye!
 + :
 + rm -f .pipe
 + mkfifo .pipe
-+ MSHPID=2901641
++ MSHPID=3345609
 + exec
 + exec ./sigdfl ./msh
 + rm -f .pipe
@@ -212,7 +212,7 @@ msh> + :
 + : '	el Minishell y el Corrector que le inyecta mandatos.'
 + : '		IGNÓRELO'
 + Sincronizar
-/bin/kill -KILL 2901652
+/bin/kill -KILL 3345619
 
 msh> rm -f .aux
 + Sincronizar
@@ -228,29 +228,29 @@ msh> : Veamos si existe, usando ls.
 msh> :
 
 msh> ls -l -a -1 -F -g -q -s .aux
-0 -rw-rw-rw- 1 jail 0 Dec 15 12:08 .aux
+0 -rw-rw-rw- 1 jail 0 Dec 16 21:04 .aux
 
 msh> :
 
-msh> /bin/kill -KILL 2901655
+msh> /bin/kill -KILL 3345622
 + '[' -f .aux ']'
 + : 'Cierto. Bien.'
-+ :
 
-msh> : Ahora + Sincronizar
-lo borramos.
+msh> + :
++ Sincronizar
+: Ahora lo borramos.
 
 msh> rm -f .aux
 
 msh> ls -l .aux
 ls: cannot access '.aux': No such file or directory
 
-msh> /bin/kill -KILL 2901665
+msh> /bin/kill -KILL 3345632
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
-+ rm -f .aux
 
-msh> + :
+msh> + rm -f .aux
++ :
 + Descriptores_de_fichero ________________________________________________
 + :
 + : 'El numero de descriptores de fichero usados por el Minishell'
@@ -258,8 +258,8 @@ msh> + :
 + :
 + : '«««   Se deben cerrar los que NO se vayan a usar.   »»»'
 + :
-+ Sincronizar
-./freefds
+./freefds+ Sincronizar
+
 1019
 
 msh> ./freefds
@@ -283,7 +283,7 @@ msh> cat .aux
 
 msh> cmp .ddf .aux
 
-msh> /bin/kill -KILL 2901671
+msh> /bin/kill -KILL 3345638
 + cmp -s .ddf .aux
 
 msh> + : 'Cierto. Bien.'
@@ -299,7 +299,7 @@ msh> + : 'Cierto. Bien.'
 last -n 10 c200172 > .aux
 cat .aux
 cat: write error: Bad file descriptor
-/bin/kill -KILL 2901683
+/bin/kill -KILL 3345651
 + '[' -f .aux ']'
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -308,11 +308,11 @@ cat: write error: Bad file descriptor
 + :
 + : '«««   Se debe truncar el fichero.   »»»'
 + :
-+ Sincronizar
 touch .void
++ Sincronizar
 cat .void > .aux
 cmp .void .aux
-/bin/kill -KILL 2901689
+/bin/kill -KILL 3345656
 + cmp -s .void .aux
 + : 'Cierto. Bien.'
 + rm -f .aux .void
@@ -340,7 +340,7 @@ rm -f .aux < .noexiste
 ls -l .aux .aux2 .noexiste
 ls: cannot access '.noexiste': No such file or directory
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901696
+/bin/kill -KILL 3345663
 + '[' -f .aux2 ']'
 + : 'Cierto. Bien.'
 + rm -f .aux2
@@ -353,14 +353,14 @@ ls: write error: Bad file descriptor
 + :
 + : '«««   Se debe abrir para lectura.   »»»'
 + :
-touch+ Sincronizar
- .aux
++ Sincronizar
+touch .aux
 echo rm .aux > .doit
 sh < .doit
 : Debería borrarse el fichero ".aux".
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901709
+/bin/kill -KILL 3345675
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + rm -f .doit
@@ -371,11 +371,11 @@ ls: cannot access '.aux': No such file or directory
 + :
 + : '«««   Se deben poder hacer simultáneamente.   »»»'
 + :
-+ Sincronizar
-env > .env
+env >+ Sincronizar
+ .env
 cat < .env > .aux
 cmp .env .aux
-/bin/kill -KILL 2901718
+/bin/kill -KILL 3345685
 + cmp -s .env .aux
 + : 'Cierto. Bien.'
 + rm -f .aux .env
@@ -391,7 +391,7 @@ cmp .env .aux
 cat .aux
 cat: write error: Bad file descriptor
 cmp .ddf .aux
-/bin/kill -KILL 2901725
+/bin/kill -KILL 3345692
 + cmp -s .ddf .aux
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -403,12 +403,12 @@ cmp .ddf .aux
 + : '«««   Se debe esperar por el último mandato.   »»»'
 + :
 + cron_ON
-+ CLOCK=43730
++ CLOCK=75849
 + Sincronizar
 sleep 10 | sleep 10 | sleep 0
-[33mUsing pipe @ process sleep -> : 2901737
-[0m[33mUsing pipe @ process sleep -> : 2901738
-[0m/bin/kill -KILL 2901736
+[33mUsing pipe @ process sleep -> : 3345704
+[0m[33mUsing pipe @ process sleep -> : 3345705
+[0m/bin/kill -KILL 3345703
 ++ cron_OFF
 + '[' 0 -lt 9 ']'
 + : 'Cierto. Bien.'
@@ -417,18 +417,18 @@ sleep 10 | sleep 10 | sleep 0
 + :
 + : '«««   Se debe conectar salida con entrada del siguiente.   »»»'
 + :
-touch .aux
 + Sincronizar
+touch .aux
 ls -l .aux
 ls: write error: Bad file descriptor
 echo rm .aux | cat | cat | sh
-[33mUsing pipe @ process echo -> : 2901749
-[0m[33mUsing pipe @ process cat -> : 2901750
-[0m[33mUsing pipe @ process cat -> : 2901751
+[33mUsing pipe @ process echo -> : 3345716
+[0m[33mUsing pipe @ process cat -> : 3345717
+[0m[33mUsing pipe @ process cat -> : 3345718
 [0m: Debería borrarse el fichero ".aux".
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901747
+/bin/kill -KILL 3345714
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + :
@@ -436,14 +436,14 @@ ls: cannot access '.aux': No such file or directory
 + :
 + : '«««   Se deben cerrar los que NO se usen.   »»»'
 + :
-./freefds
 + Sincronizar
+./freefds
 ./freefds
 ./freefds .aux
 cat .aux
 cat: write error: Bad file descriptor
 cmp .ddf .aux
-/bin/kill -KILL 2901758
+/bin/kill -KILL 3345725
 + cmp -s .ddf .aux
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -454,8 +454,8 @@ cmp .ddf .aux
 + :
 + : '«««   Se debe redirigir la salida del último mandato.   »»»'
 + :
-rm .ls1
-+ Sincronizar
+rm+ Sincronizar
+ .ls1
 rm: cannot remove '.ls1': No such file or directory
 ls -1 / > .ls1
 sort .ls1 > .aux
@@ -463,12 +463,12 @@ rev .aux > .ls1
 : El resultado de la anterior secuencia de mandatos y
 : del secuencia siguiente, ha de ser el mismo.
 ls -1 / | sort | rev > .aux
-[33mUsing pipe @ process ls -> : 2901773
-[0m[33mUsing pipe @ process sort -> : 2901774
+[33mUsing pipe @ process ls -> : 3345740
+[0m[33mUsing pipe @ process sort -> : 3345741
 [0mls -l .aux .ls1
 ls: write error: Bad file descriptor
 cmp .aux .ls1
-/bin/kill -KILL 2901767
+/bin/kill -KILL 3345734
 + cmp -s .aux .ls1
 + : 'Cierto. Bien.'
 + rm -f .aux .ls1
@@ -477,17 +477,17 @@ cmp .aux .ls1
 + :
 + : '«««   Se debe redirigir la entrada del primer mandato.   »»»'
 + :
-echo rm + Sincronizar
-.aux > .aux
++ Sincronizar
+echo rm .aux > .aux
 rev .aux > .rm
 rev | cat | cat | sh < .rm
-[33mUsing pipe @ process rev -> : 2901784
-[0m[33mUsing pipe @ process cat -> : 2901785
-[0m[33mUsing pipe @ process cat -> : 2901786
+[33mUsing pipe @ process rev -> : 3345751
+[0m[33mUsing pipe @ process cat -> : 3345752
+[0m[33mUsing pipe @ process cat -> : 3345753
 [0m: Debería borrarse el fichero ".aux".
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901782
+/bin/kill -KILL 3345749
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + rm -f .rm
@@ -497,26 +497,26 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Se debe redirigir la entrada del primer   »»»'
 + : '«««   mandato y la salida del último.           »»»'
 + :
-echo rm .aux ; + Sincronizar
-echo Fue bien > .aux
++ Sincronizar
+echo rm .aux ; echo Fue bien > .aux
 rev .aux > .rm
 cat | rev | cat | sh < .rm > .out
-[33mUsing pipe @ process cat -> : 2901796
-[0m[33mUsing pipe @ process rev -> : 2901797
-[0m[33mUsing pipe @ process cat -> : 2901798
+[33mUsing pipe @ process cat -> : 3345763
+[0m[33mUsing pipe @ process rev -> : 3345764
+[0m[33mUsing pipe @ process cat -> : 3345765
 [0m: Debería borrarse el fichero ".aux".
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901794
+/bin/kill -KILL 3345761
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + rm -f .rm
 + :
-: Debería crearse el fichero ".out" con el texto+ Sincronizar
- "Fue bien".
+: Debería crearse el fichero+ Sincronizar
+ ".out" con el texto "Fue bien".
 cat .out
 cat: write error: Bad file descriptor
-/bin/kill -KILL 2901806
+/bin/kill -KILL 3345773
 + cmp -s .out .out2
 + : 'Cierto. Bien.'
 + rm -f .out .out2
@@ -525,14 +525,14 @@ cat: write error: Bad file descriptor
 + :
 + : '«««   Se deben cerrar los que NO se usen.   »»»'
 + :
-./freefds
 + Sincronizar
+./freefds
 ./freefds
 ./freefds .aux
 cat .aux
 cat: write error: Bad file descriptor
 cmp .ddf .aux
-/bin/kill -KILL 2901812
+/bin/kill -KILL 3345779
 + cmp -s .ddf .aux
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -544,20 +544,20 @@ cmp .ddf .aux
 + :
 + : '«««   Se deben ejecutar correctamente.   »»»'
 + :
-touch .aux
 + Sincronizar
+touch .aux
 ls -l .aux
 ls: write error: Bad file descriptor
 rm -f .aux &
 rm -f .aux &
 rm -f .aux &
 
-/bin/kill -KILL 2901822
-: Debería borrarse el fichero + Sincronizar
-".aux".
+/bin/kill -KILL 3345789
+: Debería borrarse el fichero ".aux".
++ Sincronizar
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901829
+/bin/kill -KILL 3345796
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + :
@@ -566,12 +566,12 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   No se debe esperar por ellos.   »»»'
 + :
 + cron_ON
-+ CLOCK=43730
-sleep+ Sincronizar
- 10 &
++ CLOCK=75850
++ Sincronizar
 sleep 10 &
 sleep 10 &
-/bin/kill -KILL 2901837
+sleep 10 &
+/bin/kill -KILL 3345803
 ++ cron_OFF
 + '[' 0 -lt 5 ']'
 + : 'Cierto. Bien.'
@@ -580,18 +580,18 @@ sleep 10 &
 + :
 + : '«««   Se debe esperar por el mandato en foreground.   »»»'
 + :
-touch .aux
 + Sincronizar
+touch .aux
 ls -l .aux
 ls: write error: Bad file descriptor
 sleep 0 &
 sleep 0 &
 sleep 0 &
 echo sleep 1; rm -f .aux | sh
-[33mUsing pipe @ process echo -> : 2901851
+[33mUsing pipe @ process echo -> : 3345818
 [0mls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901846
+/bin/kill -KILL 3345813
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + :
@@ -606,10 +606,10 @@ ls: cannot access '.aux': No such file or directory
 + : '«««   Deben ser ignoradas o capturadas por el Minishell.   »»»'
 + :
 + : 'Se arranca otro Minishell con el siguiente PID:'
-+ PID=2901859
++ PID=3345831
 + ./sigdfl ./msh
 + Sincronizar
- __   __ ___ __    _ ___ _______ __   __/bin/kill _______  ___-KILL      ___2901860
+ __   __ ___ __    _ ___ _______ __   __ /bin/kill_______  ___-KILL      ___3345832
        _______ __   __   _______ ___    __   __ _______ ______   _______ 
 [31m'__' exited, status(-1): No such file or directory
 [0m|syntax error
@@ -621,19 +621,19 @@ ls: cannot access '.aux': No such file or directory
 |syntax error
        |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_     _| |       |   |__|       |       |    __  |  |_|  |
 |syntax error
- ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||+ : 'Se intenta matar con las señales INT, QUIT y KILL en ese orden.'
-   _   |   |  | |       |
+ ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | |   |   |   _   |       |     ||   _   |   |  | |       |
 |syntax error
-_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+_|   |_|___|_|  |__|___|_______|__+ : 'Se intenta matar con las señales INT, QUIT y KILL en ese orden.'
+| |__|_______|_______|_______| |_______| |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
 
 
 msh> 
 syntax error
-msh>+ kill -INT 2901859
-+ kill -QUIT 2901859
-+ kill -KILL 2901859
-+ wait 2901859
-/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1448: 2901859 Killed                  ./sigdfl $BIN < $PIPE
+msh>+ kill -INT 3345831
++ kill -QUIT 3345831
++ kill -KILL 3345831
++ wait 3345831
+/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1448: 3345831 Killed                  ./sigdfl $BIN < $PIPE
 + EXIT=137
 + case $EXIT in
 + : 137
@@ -643,8 +643,8 @@ msh>+ kill -INT 2901859
 + :
 + : '«««   Deben ser ignoradas por los procesos en background.   »»»'
 + :
- touch .aux+ Sincronizar
-syntax error
++ Sincronizar
+ touch .auxsyntax error
 
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
@@ -652,12 +652,12 @@ ls: cannot access '.aux': No such file or directory
 ./killmyself -INT &
 ./killmyself -INT &
 
-/bin/kill -KILL 2901865
-: Debería + Sincronizar
-borrarse el fichero ".aux".
+/bin/kill -KILL 3345836
+:+ Sincronizar
+ Debería borrarse el fichero ".aux".
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901871
+/bin/kill -KILL 3345843
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + :
@@ -665,15 +665,15 @@ ls: cannot access '.aux': No such file or directory
 + :
 + : '«««   Deben ser la acción por defecto para procesos en foreground.   »»»'
 + :
-touch .aux
 + Sincronizar
+touch .aux
 ls -l .aux
 ls: write error: Bad file descriptor
 : NO debería borrarse el fichero ".aux".
 ./killmyself -INT
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901875
+/bin/kill -KILL 3345847
 + '[' -f .aux ']'
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -697,7 +697,7 @@ pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
 cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
 cat: write error: Bad file descriptor
 cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-/bin/kill -KILL 2901883
+/bin/kill -KILL 3345855
 ++ cd ..
 ++ pwd
 ++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
@@ -711,13 +711,13 @@ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + : '«««   por la salida estándar con formato "%s\n".    »»»'
 + :
 cd ..
-cd . >+ Sincronizar
- /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cd .+ Sincronizar
+ > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
 cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
 cat: write error: Bad file descriptor
 cmp /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
 cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-/bin/kill -KILL 2901891
+/bin/kill -KILL 3345863
 + cmp -s /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
 + : 'Cierto. Bien.'
 + rm -f .pwd .cd
@@ -727,14 +727,14 @@ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + : 'Cuando se invoca "cd" sin argumentos:'
 + : '«««   Debe cambiar al directorio HOME.   »»»'
 + :
-cd ..
+cd+ Sincronizar
+ ..
 cd
-pwd + Sincronizar
-> /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
 cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
 cat: write error: Bad file descriptor
 cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-/bin/kill -KILL 2901898
+/bin/kill -KILL 3345869
 ++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
 + '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 = /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 ']'
 + : 'Cierto. Bien.'
@@ -748,16 +748,16 @@ cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
 cd ...
 [31mCan't access directory: No such file or directory
-[0m/bin/kill -KILL 2901903
+[0m/bin/kill -KILL 3345875
 + :
 + : 'Si se invoca con demasiados argumentos:'
 + : '«««   Se debe notificar el error.   »»»'
 + :
-cd+ Sincronizar
- a b
++ Sincronizar
+cd a b
 [31mCant have more than 1 argument for 'CD': Bad file descriptor
 [0mcd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
-/bin/kill -KILL 2901905
+/bin/kill -KILL 3345877
 + :
 + LEVEL=45
 + :
@@ -767,12 +767,12 @@ cd+ Sincronizar
 + : '«««   Se debe mostrar la mascara de creación de ficheros,   »»»'
 + : '«««   por la salida estándar con formato "%o\n".            »»»'
 + :
-umask
-umask >+ Sincronizar
- .aux
+umask+ Sincronizar
+
+umask > .aux
 cat .aux
 cat: write error: Bad file descriptor
-/bin/kill -KILL 2901908
+/bin/kill -KILL 3345879
 ++ cat .aux
 + '[' 0 -eq 0 ']'
 + : 'Cierto. Bien.'
@@ -783,23 +783,23 @@ cat: write error: Bad file descriptor
 + : 'Cuando se invoca "umask" sin argumentos:'
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
-umask > + Sincronizar
-.aux
++ Sincronizar
+umask > .aux
 : Debería crearse con permisos "rw-rw-rw-"
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901913
+/bin/kill -KILL 3345884
 ++ ls -l .aux
 ++ cut -c-10
 + '[' -rw-rw-rw- = -rw-rw-rw- ']'
 + : 'Cierto. Bien.'
 + :
-chmod+ Sincronizar
- +x .aux
++ Sincronizar
+chmod +x .aux
 : Debería cambiarse a permisos "rwxrwxrwx"
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901920
+/bin/kill -KILL 3345892
 ++ ls -l .aux
 ++ cut -c-10
 + '[' -rwxrwxrwx = -rwxrwxrwx ']'
@@ -811,8 +811,8 @@ ls: write error: Bad file descriptor
 + : '«««   Se debe modificar el valor actual de la mascara      »»»'
 + : '«««   con el valor del argumento interpretado en base 8.   »»»'
 + :
-chmod 0 .aux
-+ Sincronizar
+chmod+ Sincronizar
+ 0 .aux
 : Debería cambiarse a permisos "---------"
 ls -l .aux
 ls: write error: Bad file descriptor
@@ -821,7 +821,7 @@ chmod +rwx .aux
 : Debería cambiarse a permisos "rwxr-x--x"
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901928
+/bin/kill -KILL 3345900
 ++ ls -l .aux
 ++ cut -c-10
 + '[' -rwxr-x--x = -rwxr-x--x ']'
@@ -833,8 +833,8 @@ ls: write error: Bad file descriptor
 + : '«««   Se debe notificar el error.                           »»»'
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
-chmod 0 .aux
-+ Sincronizar
+chmod+ Sincronizar
+ 0 .aux
 : Debería cambiarse a permisos "---------"
 ls -l .aux
 ls: write error: Bad file descriptor
@@ -844,7 +844,7 @@ umask 888
 : Debería cambiarse a permisos "rwxr-x--x"
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901939
+/bin/kill -KILL 3345911
 ++ ls -l .aux
 ++ cut -c-10
 + '[' -rwxr-x--x = -rwxr-x--x ']'
@@ -856,8 +856,8 @@ ls: write error: Bad file descriptor
 + : '«««   Se debe notificar el error.                           »»»'
 + : '«««   No se debe modificar el valor actual de la mascara.   »»»'
 + :
-chmod 0 .aux
-+ Sincronizar
+chmod+ Sincronizar
+ 0 .aux
 : Debería cambiarse a permisos "---------"
 ls -l .aux
 ls: write error: Bad file descriptor
@@ -867,7 +867,7 @@ umask 115 0
 : Debería cambiarse a permisos "rwxr-x--x"
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901950
+/bin/kill -KILL 3345922
 ++ ls -l .aux
 ++ cut -c-10
 + '[' -rwxr-x--x = -rwxr-x--x ']'
@@ -886,7 +886,7 @@ ls: write error: Bad file descriptor
 time sleep 0 > .aux
 ls -l .aux
 ls: write error: Bad file descriptor
-/bin/kill -KILL 2901961
+/bin/kill -KILL 3345933
 + '[' -s .aux ']'
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -898,12 +898,12 @@ ls: write error: Bad file descriptor
 + : 'Cuando se invoca "time" sin argumentos:'
 + : '«««   Se debe notificar el tiempo consumido.   »»»'
 + :
-time
-+ Sincronizar
+time+ Sincronizar
+
 time > .aux
 cat .aux
 cat: write error: Bad file descriptor
-/bin/kill -KILL 2901966
+/bin/kill -KILL 3345938
 + '[' -s .aux ']'
 + : 'Cierto. Bien.'
 + rm -f .aux
@@ -914,12 +914,12 @@ cat: write error: Bad file descriptor
 + : '«««   Se debe ejecutar el mandato indicado.                    »»»'
 + : '«««   Se debe notificar el tiempo consumido en su ejecución.   »»»'
 + :
-touch .aux
 + Sincronizar
+touch .aux
 time rm -f .aux
 ls -l .aux
 ls: cannot access '.aux': No such file or directory
-/bin/kill -KILL 2901971
+/bin/kill -KILL 3345942
 + '[' -f .aux ']'
 + : 'Falso. Bien.'
 + :
@@ -930,13 +930,13 @@ ls: cannot access '.aux': No such file or directory
 + : 'El metacarácter "$" con argumento "HOME" :'
 + : '«««   Se debe sustituir por el valor de la variable "HOME".   »»»'
 + :
-: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
+: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
 echo $HOME
 echo: write error: Bad file descriptor
 echo $HOME > .aux
-/bin/kill -KILL 2901976
+/bin/kill -KILL 3345947
 + cmp -s .aux .home
 + : 'Cierto. Bien.'
 + rm -f .aux .home
@@ -946,22 +946,14 @@ echo $HOME > .aux
 + : 'Donde aparezca el metacarácter "$" con argumento:'
 + : '«««   Se debe sustituir correctamente la variable por su valor.   »»»'
 + :
-echo + echo /../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
-/..$HOME/. > .aux
-+ Sincronizar
++ echo /../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
+echo /..$HOME/. > + Sincronizar
+.aux
 cat .aux
 cat: write error: Bad file descriptor
-/bin/kill -KILL 2901984
+/bin/kill -KILL 3345956
 + cmp .aux .aux2
-.aux .aux2 differ: char 2, line 1
-[31m'.aux' exited, status(-1): Permission denied
-[0m+ : Falso.
-+ ERROR_GRAVE
-+ NOTA=60
-+ : '########## ATENCIÓN ##########'
-+ :
-+ : 'El nombre de la variable comienza tras el metacarácter "$"'
-+ : 'y es aquel que casa con el formato "%[_a-zA-Z0-9]"'
++ : 'Cierto. Bien.'
 + rm -f .aux .aux2
 + :
 + LEVEL=65
@@ -971,8 +963,8 @@ cat: write error: Bad file descriptor
 + : 'El metacarácter "~" sin argumento:'
 + : '«««   Se debe sustituir por el valor de la variable "HOME".   »»»'
 + :
-: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 + Sincronizar
+: HOME=/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
 echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
 echo ~
 + TIMEOUT
@@ -985,6 +977,7 @@ cat: .aux: No such file or directory
 + '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 = '' ']'
 + : Falso.
 + ERROR_GRAVE
++ NOTA=65
 + : '########## ATENCIÓN ##########'
 + :
 + : 'El metacarácter "~" NO se sustituye correctamente.'
@@ -1003,13 +996,13 @@ cat: .aux: No such file or directory
 ++ : 'No deben producirse señales como SIGBUS o SIGSEGV que le maten.'
 ++ : 'No debe hacer EXIT ante errores provocados por el usuario.'
 ++ :
-++ exit 60
+++ exit 65
 + case $NOTA in
-+ : 60
++ : 65
 + : '*** ATENCIÓN ***'
 + : 'Para APROBAR LA PARTE PRACTICA de la asignatura       '
 + : 'es IMPRESCINDIBLE obtener como mínimo 4.5 puntos.     '
 + : 'Debe usted llegar a una media de 4.5 entre esta       '
 + : 'práctica y las demás (si las hubiera).                '
 + :
-+ exit 60
++ exit 65

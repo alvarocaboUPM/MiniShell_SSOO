@@ -66,16 +66,16 @@
 static pid_t PID;		   // Identificador de proceso
 static char CWD[MAX_PATH]; // Path de trabajo actual
 
-#pragma GCC diagnostic ignored "-Wformat" //Para el formato de time
+#pragma GCC diagnostic ignored "-Wformat" // Para el formato de time
 
 //========DECLARACIÓN DE FUNCIONES==========
 
 extern int obtain_order(); /* See parser.y for description */
 int *countArgs(char ***argvv, int argvc);
-void metacharsHandler(char* command[]);
-int metaUser(char* cursor);
-int metaVar(char* cursor);
-int followsFormat(char *pos, int* follows_format) ;
+void metacharsHandler(char *command[]);
+int metaUser(char *cursor);
+int metaVar(char *cursor);
+int followsFormat(char *pos, int *follows_format);
 int redirHandler(char **filev);
 int redir(int i, char **filev, int *original);
 // Visuals
@@ -89,11 +89,9 @@ void okPrint(char *err);
 int exeIC(char **argv, int argc, char **redirs, int *status);
 int cdIC(char **argv, int argc);
 int timeIC(char **argv, int argc);
-//Auxiliares de time
-
 void start_clock();
 int printTMS(struct tms t);
-int littleDad(char * argv[]);
+int littleDad(char *argv[]);
 
 int umaskIC(char **argv, int argc);
 int readIC(char **argv, int argc);
@@ -148,7 +146,7 @@ int main(void)
 	int bg_Pid = 0; // PID de la función de bg
 	PID = getpid(); // PID de la shell
 
-	//SIGNALS
+	// SIGNALS
 	struct sigaction sa;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = 0;
@@ -157,11 +155,11 @@ int main(void)
 	// Ignored signals
 	sigaction(SIGQUIT, &sa, NULL);
 	sigaction(SIGINT, &sa, NULL);
-	//Acciones provocadas por el usuario
+	// Acciones provocadas por el usuario
 	sigaction(SIGBUS, &sa, NULL);
 	sigaction(SIGSEGV, &sa, NULL);
 
-	//BUFFERS E-S
+	// BUFFERS E-S
 	setbuf(stdout, NULL); /* Unbuffered */
 	setbuf(stdin, NULL);
 
@@ -169,14 +167,14 @@ int main(void)
 	printWelcome();
 
 	// Guarda el momento de inicio del minishell
-	start_clock(); 
+	start_clock();
 
 	/* BUCLE INFINITO*/
 	while (1)
 	{
 		// Necesitamos obtener el dir y el PID del calling process
 		getcwd(CWD, sizeof(CWD));
-		//Promt
+		// Promt
 		printf("\nmsh> ");
 		ret = obtain_order(&argvv, filev, &bg);
 		if (ret == 0) /* EOF */
@@ -193,7 +191,7 @@ int main(void)
 #if 1
 		/*YOU CAN COMMENT THIS SECTION BY SWITCHING THE IF*/
 
-		int *argcc = countArgs(argvv, argvc);
+		int*argcc = countArgs(argvv, argvc);
 		char **command = NULL;
 		int atCommand = 0; // Numero de comandos registrados
 
@@ -216,7 +214,7 @@ int main(void)
 		while ((command = argvv[atCommand]))
 		{
 			int n_args = argcc[atCommand] - 1; // Le quitamos el nombre del comando
-			
+
 			// Updates flags
 			isLast = atCommand == argvc - 1;
 			isFirst = atCommand == 0;
@@ -244,7 +242,7 @@ int main(void)
 			puts(" "
 					" ");
 #endif
-			//Metachars
+			// Metachars
 			metacharsHandler(command);
 
 			// Catch null
@@ -281,16 +279,16 @@ int main(void)
 			 ******************/
 			case 0:
 				// Case redirects:
-				if (isFirst && filev[STDIN_FILENO] && 
-				redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
+				if (isFirst && filev[STDIN_FILENO] &&
+					redir(STDIN_FILENO, filev, &original) != STDIN_FILENO)
 					return errorPrint("Error al redirigir la entrada estandar en hijo");
 
-				if (isLast && filev[STDOUT_FILENO] && 
-				redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
+				if (isLast && filev[STDOUT_FILENO] &&
+					redir(STDOUT_FILENO, filev, &original) != STDOUT_FILENO)
 					return errorPrint("Error al redirigir la salida estandar en hijo");
 
-				if (filev[STDERR_FILENO] && 
-				redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
+				if (filev[STDERR_FILENO] &&
+					redir(STDERR_FILENO, filev, &original) != STDERR_FILENO)
 					return errorPrint("Error al redirigir la salida de error estandar en hijo");
 
 				// Case bg; do not ignore signals if not bg
@@ -339,7 +337,8 @@ int main(void)
 				// Case: Normal execution
 				if (exeIC(command, n_args, filev, ret_status) == -1)
 				{
-					*ret_status = execvp((const char*)command[0], (char *const *)command);
+					//command[n_args+1]=NULL;
+					*ret_status = execvp((const char *)command[0], (char *const *)command);
 				}
 				// Catching the error message
 				if (*ret_status != 0)
@@ -411,7 +410,7 @@ int main(void)
 				dup2(original, hasRedirects);
 			}
 		}
-	#endif
+#endif
 	}
 	exit(0);
 	return 0;
@@ -463,10 +462,9 @@ void okPrint(char *err)
 
 /**
  * @brief Función que imprime el promt con la estructura
- * username"@"CWD$ 
+ * username"@"CWD$
  * @param CWD Current directory
  */
-
 void PrintPromtCWD(char *CWD)
 {
 	// Prompt: user@PATH$
@@ -500,14 +498,14 @@ void PrintPromtCWD(char *CWD)
 
 /**
  * @brief Gets the number of arguments on every imput command
- * 
+ *
  * @param argvv Array de comandos
  * @param argvc Longitud del array
  * @return Númemo de argumentos de cada comando
  */
 int *countArgs(char ***argvv, int argvc)
 {
-	int *res = malloc(sizeof(int)*argvc);
+	int *res = malloc(sizeof(int) * argvc);
 	int i = 0;
 
 	while (argvv[i] != NULL)
@@ -516,11 +514,11 @@ int *countArgs(char ***argvv, int argvc)
 		char *test;
 		while ((test = argvv[i][count]))
 		{
-			// fprintf(stderr, "\t%d : %s\n", count, test);
+			//fprintf(stderr, "\t%d : %s\n", count, test);
 			count++;
 		}
 		res[i] = count;
-		// fprintf(stderr, "\tRes[%d]: %d\n", i, res[i]);
+		//fprintf(stderr, "\tRes[%d]: %d\n", i, res[i]);
 		i++;
 	}
 	return res;
@@ -529,38 +527,42 @@ int *countArgs(char ***argvv, int argvc)
 /**
  * @brief Detects any valid metachars in the given command
  * and 'translates' them to a valid path or argument for the minishell
- * 
+ *
  * @param argv Input command
  */
-void metacharsHandler(char* command[]){
-
-	for (int i=1;command[i];i++)
+void metacharsHandler(char *command[])
+{
+	for (int i = 1; command[i]; i++)
 	{
-		//printf("C-> %s\n", command[i]);
-		if(command[i][0]=='~' && metaUser(command[i])<0) return;
-		if(strchr(command[i], '$')!= NULL && metaVar(command[i])<0) return;
+		if (command[i][0] == '~' && metaUser(command[i]) < 0)
+			return;
+		if (strchr(command[i], '$') != NULL && metaVar(command[i]) < 0)
+			return;
 	}
 }
 
 /**
- * @brief 
- * 
- * @param cursor 
- * @return 0 if found | -1 for error  
+ * @brief
+ *
+ * @param cursor
+ * @return 0 if found | -1 for error
  */
-int metaUser(char* cursor){
-	char*possible_user = cursor+1; //Quitamos el '~'
+int metaUser(char *cursor)
+{
+	char *possible_user = cursor + 1; // Quitamos el '~'
 	// no user given, use the current user
-	if (possible_user[0] == '\0') 
-	strcpy(possible_user,getenv("USER"));
-	
-	if (!followsFormat(possible_user, NULL)) {
+	if (possible_user[0] == '\0')
+		strcpy(possible_user, getenv("USER"));
+
+	if (!followsFormat(possible_user, NULL))
+	{
 		errorPrint("Given user doesn't follow format");
 		return -1;
 	}
 
 	struct passwd *user = getpwnam(possible_user);
-	if (user == NULL) {
+	if (user == NULL)
+	{
 		errno = EINVAL;
 		// make a formatted error message
 		char *error_message = malloc(sizeof(char) * (strlen(possible_user) + strlen("No existe el usuario ") + 1));
@@ -570,76 +572,80 @@ int metaUser(char* cursor){
 		return -1;
 	}
 	// get the user's home directory
-	char *home_dir = user->pw_dir;
-	// replace the ~ with the home directory
-	strcpy(cursor, home_dir);
+	strncpy(cursor,user->pw_dir,strlen(user->pw_dir));
+
 	return 0;
 }
 
 /**
  * @brief Swaps the given command with the env
  * variable value
- * 
- * @param cursor 
- * @return 0 if found | 1 if not found | -1 for error 
+ *
+ * @param cursor
+ * @return 0 if found | 1 if not found | -1 for error
  */
-int metaVar(char* cursor){
-	
+int metaVar(char *cursor)
+{
 	char *pos;
-	if((pos = strchr(cursor, '$') + 1) == NULL){
+	if ((pos = strchr(cursor, '$') + 1) == NULL)
+	{
 		return 1;
 	}
 
-	char *res = malloc(sizeof(char)*MAX_PATH);
-	res[0]='\0';
-	
+	char *res = malloc(sizeof(char) * MAX_PATH);
+	res[0] = '\0';
+
 	int offset = pos - cursor - 1;
 
 	// check if pos is further into the string than command[n_arg]
-	if (offset != 0) {
+	if (offset != 0)
+	{
 		strncat(res, cursor, offset);
 	}
 	int var_size;
-	//Check format
-	if (!(followsFormat(pos, &var_size))) {
+	// Check format
+	if (!(followsFormat(pos, &var_size)))
+	{
 		errorPrint("Given user doesn't follow format");
 		return -1;
 	}
 
-	//Allocating memory for expanding var
-	char *var = malloc(sizeof(char)*var_size);
+	// Allocating memory for expanding var
+	char *var = malloc(sizeof(char) * var_size);
 	var[var_size] = '\0';
-	//Copying pos name @ var
+	// Copying pos name @ var
 	strncpy(var, pos, var_size);
-	
-	//Retriving it from enviromment
+
+	// Retriving it from enviromment
 	char *var_value = getenv(var);
-	if (var_value == NULL) {
+	if (var_value == NULL)
+	{
 		errorPrint("Variable de entorno undefined");
 		return -1;
 	}
 	strcat(res, var_value);
 
-	//Concatenate the rest of the command
+	// Concatenate the rest of the command
 	offset = strlen(pos) - strlen(var);
-	if(offset>0){
-		strncat(res, (pos+strlen(var)), offset);
+	if (offset > 0)
+	{
+		strncat(res, (pos + strlen(var)), offset);
 	}
-
 	strcpy(cursor, res);
 	free(var);
-	free(res); 
-    return 0;
+	free(res);
+	return 0;
 }
 
-int followsFormat(char *pos, int* follows_format) {
-	if(follows_format==NULL){
+int followsFormat(char *pos, int *follows_format)
+{
+	if (follows_format == NULL)
+	{
 		follows_format = malloc(sizeof(int));
-	} 
-	char * format = "%*[_a-zA-Z0-9]%n";
-    sscanf(pos, format , follows_format);
+	}
+	char *format = "%*[_a-zA-Z0-9]%n";
+	sscanf(pos, format, follows_format);
 	return *follows_format;
-
 }
 
 /*===========REDIRECTS============*/
@@ -647,7 +653,7 @@ int followsFormat(char *pos, int* follows_format) {
 /**
  * @brief Detects if any of the filev components
  * has been requested
- * 
+ *
  * @param filev[3]
  * @return Index of the redirected fd
  * @throw -1 if non has been requested
@@ -668,11 +674,14 @@ int redirHandler(char **filev)
 	return i;
 }
 
-/*
-	Implemets the logic of redirect
-	@return The index given in case of success
-	@throw -1 if something wrong
-*/
+/**
+ * @brief Implemets the logic of redirect
+ * 
+ * @param i Requested redirect returned by redirHandler
+ * @param filev 
+ * @param original 
+ * @return The index given in case of success | -1 if something wrong
+ */
 int redir(int i, char **filev, int *original)
 {
 	/* 0 = < STDIN	|| 1 = > STDOUT || 2 = >& STDERR */
@@ -701,12 +710,11 @@ int redir(int i, char **filev, int *original)
 	return i;
 }
 
-
 /*INTERNAL COMMANDS SELECT AND IMPLEMENTATION*/
 
 /**
  *  @brief Executes internal commands
- * 
+ *
  *	@param argv Array de comandos
  *	@param argc Numero de argumentos
  *	@param redirs 3 posibles nombres de archivos para redirigir
@@ -723,11 +731,15 @@ int exeIC(char **argv, int argc, char **redirs, int *status)
 	{
 		if (!strcmp(function_map[i].name, argv[0]) && function_map[i].func)
 		{
-			// Ejecuta la función
+			
 			if (redAt > -1 && redir(redAt, redirs, &og) != redAt)
 				errorPrint("Error en la redirección");
+
+			// Ejecuta la función
 			*status = function_map[i].func(argv, argc);
-			dup2(og, redAt);
+			//Restauramos
+			if(redAt> -1)
+				dup2(og, redAt);
 			return 0;
 		}
 	}
@@ -739,8 +751,8 @@ int exeIC(char **argv, int argc, char **redirs, int *status)
 	closest implementation for this minishell */
 
 /**
- * @brief 
- *	
+ * @brief
+ *
  * @param [dir] (argc <=2)
  *		if length(argv) == 1 -> dir = $HOME
  * @return 0 if $PWD changed, -1 otherwise
@@ -796,23 +808,24 @@ int cdIC(char **argv, int argc)
  */
 int timeIC(char **argv, int argc)
 {
-	#ifndef CLK_TCK
+#ifndef CLK_TCK
 	int CLK_TCK = sysconf(_SC_CLK_TCK);
-	#endif
+#endif
 	clock_t time, userticks, systticks;
 	struct tms t;
 	int pid;
 
-	//Si no hay argumentos, tiempo minishell e hijos
-	if(argc==0){
+	// Si no hay argumentos, tiempo minishell e hijos
+	if (argc == 0)
+	{
 		printTMS(t);
 		return 0;
 	}
-	//Iniciar contadores
+	// Iniciar contadores
 	userticks = 0;
 	systticks = 0;
 
-	if ((time = -times(&t)) ==-1)
+	if ((time = -times(&t)) == -1)
 	{
 		errorPrint("Error al comprobar los tiempos");
 		return -1;
@@ -820,17 +833,18 @@ int timeIC(char **argv, int argc)
 
 	userticks = -t.tms_utime - t.tms_cutime;
 	systticks = -t.tms_stime - t.tms_cstime;
-	signal(SIGINT,  SIG_IGN);   /* <<=== Ignorar se�ales de      */
-	signal(SIGQUIT, SIG_IGN);   /* <<=== terminaci�n interactiva */
-	//Ejecución controlada
-	if((pid=littleDad(++argv))<0) return -1;
+	signal(SIGINT, SIG_IGN);  /* <<=== Ignorar se�ales de      */
+	signal(SIGQUIT, SIG_IGN); /* <<=== terminaci�n interactiva */
+	// Ejecución controlada
+	if ((pid = littleDad(++argv)) < 0)
+		return -1;
 	time += times(&t);
 	userticks += t.tms_utime + t.tms_cutime;
 	systticks += t.tms_stime + t.tms_cstime;
 
-	printf("%d.%03du ", (int)userticks/CLK_TCK);
-	printf("%d.%03ds ", (int)systticks/CLK_TCK);
-	printf("%ds.%03dr\n", (int)time/CLK_TCK);
+	printf("%d.%03du ", (int)userticks / CLK_TCK);
+	printf("%d.%03ds ", (int)systticks / CLK_TCK);
+	printf("%ds.%03dr\n", (int)time / CLK_TCK);
 
 	return 0;
 }
@@ -851,7 +865,7 @@ void start_clock()
  * @param t tms struct to be printed
  */
 int printTMS(struct tms t)
-{	
+{
 	clock_t time2;
 	if ((time2 = times(&t)) < 0)
 	{
@@ -868,40 +882,43 @@ int printTMS(struct tms t)
 /**
  * @brief Acts as a little main function
  * that handles the forked process and executes the given command
- * 
+ *
  * @param argv Command to be executed
  * @return pid of the child process
  * @throw -1 if error
  */
-int littleDad(char * argv[]){
-	
+int littleDad(char *argv[])
+{
+
 	int status;
 	int pid = fork();
 
-	//Hijo ejecuta
-	if (pid == 0){
-		if(execvp(argv[0], argv)<0)
+	// Hijo ejecuta
+	if (pid == 0)
+	{
+		if (execvp(argv[0], argv) < 0)
 			errorPrint("Error al ejecutar el comando en time");
 		exit(1);
 	}
-		
-	//Padre espera y devuelve el status
+
+	// Padre espera y devuelve el status
 	pid = waitpid(pid, &status, 0);
-	if(status!=0){
-			char buff[50];
-			sprintf(buff, "Bad ending status -> %d", status);
-			errorPrint(buff);
-		}
+	if (status != 0)
+	{
+		char buff[50];
+		sprintf(buff, "Bad ending status -> %d", status);
+		errorPrint(buff);
+	}
 	return (pid == -1) ? -1 : pid;
 }
 
 /**
  * @brief Emulates umask command in unix
- * 
+ *
  * @param argv Arguements of umask + command itself
  * @param argc Number of arguments
  * @if OK @return 0
- * @else @return -1  
+ * @else @return -1
  */
 int umaskIC(char **argv, int argc)
 {
@@ -960,14 +977,15 @@ void printIntArray(int *arr)
 void printCharArray(char *arr)
 {
 	warningPrint("\nPriting Char array -> ");
-	int i; char c;
-	printf("%c",'"');
+	int i;
+	char c;
+	printf("%c", '"');
 
-	for (i = 0; (c=arr[i]); i++)
+	for (i = 0; (c = arr[i]); i++)
 	{
 		printf("%c", c);
 	}
-	printf("%c\n",'"');
+	printf("%c\n", '"');
 }
 
 int getFDsOpen()
@@ -988,7 +1006,6 @@ int getFDsOpen()
 	{
 		if (count >= 0)
 		{
-
 			printf("%s, ", de->d_name);
 		}
 		count++;

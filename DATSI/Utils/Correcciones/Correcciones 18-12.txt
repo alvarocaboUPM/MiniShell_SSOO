@@ -1,0 +1,1087 @@
+
++ INVOCACION '/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3 -2022=
+b'
++ :
++ : '	 "Corrector de la pr=C3=A1ctica del Minishell. Versi=C3=B3n 4.5.3"'
++ : '	 "Copyright =C2=A9 1993-2020 Francisco Rosales =C2=ABfrosal@fi.upm.es=
+=C2=BB"'
++ :
++ : '	 FECHA: "Sat Dec 17 21:03:56 CET 2022"'
++ : '	 GRUPO: "c200172"'
++ : '	 AUTORES: "c200172; alvaro.cabo@alumnos.upm.es; =C3=81lvaro Cabo Ciud=
+ad"'
++ :
++ INTRODUCCION
++ :
++ : 'El presente texto es la traza de ejecuci=C3=B3n de las pruebas'
++ : 'realizadas sobre su pr=C3=A1ctica del Minishell.'
++ :
++ : 'Las l=C3=ADneas de este texto que comienzan por "+" son mandatos'
++ : 'de un Bourne Shell que tiene tal car=C3=A1cter como prompt.'
++ : 'El mandato ":" es el mandato nulo.'
++ :
++ : 'Para localizar r=C3=A1pidamente las partes de inter=C3=A9s de este tex=
+to,'
++ : 'buscad la tira "########## ATENCI=C3=93N ##########" .'
++ :
++ : Nota:
++ : '	 Esta utilidad se encuentra EN DESARROLLO.'
++ : '	 Los RESULTADOS obtenidos NO son DEFINITIVOS y, por tanto,'
++ : '	 la VALORACI=C3=93N obtenida NO se entender=C3=A1 como DEFINITIVA.'
++ :
++ DONDE_OBTENER_AYUDA
++ :
++ : 'La informaci=C3=B3n b=C3=A1sica necesaria para la realizaci=C3=B3n de =
+esta'
++ : 'pr=C3=A1ctica se encuentra en los siguientes documentos:'
++ : ' #	 Memoria de la pr=C3=A1ctica. Contiene informaci=C3=B3n abundante'
++ : '	 y detallada sobre el comportamiento deseado, y muchas'
++ : '	 referencias a las funciones que se deben usar.'
++ : ' #	 Manual de UNIX. En caso de duda sobre como usar una'
++ : '	 funci=C3=B3n de librer=C3=ADa o mandato, utilice el mandato man.'
++ : ' #	 Libros de C. La bibliograf=C3=ADa sobre este lenguaje es muy'
++ : '	 extensa. Sea meticuloso y limpio a la hora de programar'
++ : '	 y no deje de comentar debidamente su propio c=C3=B3digo.'
++ :
++ :
++ PREPARACION_DEL_ENTORNO_DE_TRABAJO =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
++ :
++ Crear_nulo _______________________________________________ previo ______
++ :
++ '[' -f :.c ']'
++ : 'Ya existe.'
++ make :
+make: ':' is up to date.
++ ./: Bien.
++ :
++ Crear_freefds ____________________________________________ previo ______
++ :
++ '[' -f freefds.c ']'
++ : 'Ya existe.'
++ make freefds
+make: 'freefds' is up to date.
++ : Bien.
++ :
++ Crear_nofiles ____________________________________________ previo ______
++ :
++ '[' -f nofiles.c ']'
++ : 'Ya existe.'
++ make nofiles
+make: 'nofiles' is up to date.
++ : Bien.
++ :
++ : 'Recordamos el numero de descriptores de fichero disponibles.'
+++ ./nofiles
++ NOFILES=3D1024
++ :
++ Crear_killmyself _________________________________________ previo ______
++ :
++ '[' -f killmyself.c ']'
++ : 'Ya existe.'
++ make killmyself
+make: 'killmyself' is up to date.
++ : Bien.
++ :
++ Crear_sigdfl _____________________________________________ previo ______
++ :
++ '[' -f sigdfl.c ']'
++ : 'Ya existe.'
++ make sigdfl
+make: 'sigdfl' is up to date.
++ : Bien.
++ :
++ Eliminar_ficheros_temporales _____________________________ previo ______
++ :
++ : 'Borramos los ficheros temporales que se utilizan.'
++ :
++ rm -f .aux .aux2 .aux3 .void .doit .env .ls1
++ rm -f .rm .out .out2 .ddf .pwd .cd .home
++ :
++ Establecer_entorno _______________________________________ previo ______
++ :
++ : 'Antes de continuar, establecemos el entorno que ser=C3=A1 heredado por'
++ : 'todo mandato que se ejecute a partir de ahora.'
++ :
++ umask 0
++ PATH=3D/bin:/usr/bin:/usr/local/bin:.
++ HOME=3D/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
++ WHO=3Dc200172
++ export PATH HOME WHO
++ :
++ Compilar_el_Minishell ____________________________________ previo ______
++ :
++ make msh
+gcc -Wall -g   -c -o main.o main.c
+gcc -Wall -g  -o msh parser.o scanner.o main.o
++ : Bien.
++ :
++ :
++ PRINCIPIO_DE_LA_CORRECCION =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
++ :
++ LEVEL=3D0
++ :
++ case "$COMPLEX" in
++ Lineas_simples_y_fin_de_fichero ________________________________________
++ :
++ : 'Su Minishell debe aceptar l=C3=ADneas en blanco y mandatos simples'
++ : 'y debe terminar limpiamente cuando se cierre su entrada est=C3=A1ndar.'
++ :
++ MSHPID=3D3648056
++ ./msh
++ wait 3648056
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ =
+__   __   _______ ___    __   __ _______ ______   _______=20
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |=
+  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |=
+  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |=
+       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||=
+_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   |=
+ |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______|=
+ |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
+
+msh>=20
+
+msh>=20
+
+msh>     =20
+
+msh> 		=20
+
+msh> /usr/bin/env
+PWD=3D/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+HOME=3D/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+WHO=3Dc200172
+TMPDIR=3D/tmp
+SHLVL=3D0
+PATH=3D/bin:/usr/bin:/usr/local/bin:.
+_=3D./msh
+
+msh> /bin/echo
+
+
+msh> ../../../../../../../../../../bin/echo
+
+
+msh> ./:
+
+msh>=20
+
+msh>=20
+Bye!
++ EXIT=3D0
++ case $EXIT in
++ : 0
++ : Bien.
++ :
++ Ejecucion_del_Minishell ________________________________________________
++ :
++ : 'Preparamos una tuber=C3=ADa por la que inyectar mandatos al Minishell'
++ : 'y lanzamos su ejecuci=C3=B3n.'
++ :
++ rm -f .pipe
++ mkfifo .pipe
++ MSHPID=3D3648065
++ exec
++ exec ./sigdfl ./msh
++ rm -f .pipe
+ __   __ ___ __    _ ___ _______ __   __ _______ ___     ___       _______ =
+__   __   _______ ___    __   __ _______ ______   _______=20
+|  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    |=
+  | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   |=
+  |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|       |   |       |   | |_____|       |   |___|   |   |   |     |       |=
+       | |       |   |  |       |       |   |_||_|  | |  |
+|       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||=
+_     _| |       |   |__|       |       |    __  |  |_|  |
+| ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   |=
+ |   |   |   _   |       |     ||   _   |   |  | |       |
+|_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______|=
+ |___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
+
+msh> + :
++ LEVEL=3D5
++ :
++ Mandatos_sin_argumentos ________________________________________________
++ :
++ : 'Se ejecutan mandatos, que est=C3=A1n en el PATH, sin argumentos.'
++ :
+=2E/:
+
+msh> :
+
+msh> echo
+
+
+msh> + :
++ Mandatos_con_varios_argumentos _________________________________________
++ :
++ : 'Se ejecutan mandatos, que est=C3=A1n en el PATH, CON varios argumentos=
+=2E'
++ :
++ : '	NOTA:'
++ : '	El siguiente mandato: "/bin/kill -KILL ##"'
++ : '	aparecer=C3=A1 en multitud de ocasiones en el presente texto.'
++ : '	Se utiliza para sincronizar la ejecuci=C3=B3n de dos procesos'
++ : '	el Minishell y el Corrector que le inyecta mandatos.'
++ : '		IGN=C3=93RELO'
++ Sincronizar
+/bin/kill -KILL 3648076
+
+msh> rm -f .aux+ Sincronizar
+
+
+msh> touch .aux
+
+msh> :
+
+msh> : El mandato "touch" debe haber creado el fichero ".aux".
+
+msh> : Veamos si existe, usando ls.
+
+msh> :
+
+msh> ls -l -a -1 -F -g -q -s .aux
+0 -rw-rw-rw- 1 jail 0 Dec 17 21:03 .aux
+
+msh> :
+
+msh> /bin/kill -KILL 3648079
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
+
+msh> + :
+: Ahora lo+ Sincronizar
+ borramos.
+
+msh> rm -f .aux
+
+msh> ls -l .aux
+ls: cannot access '.aux': No such file or directory
+
+msh> /bin/kill -KILL 3648089
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ rm -f .aux
+
+msh> + :
++ Descriptores_de_fichero ________________________________________________
++ :
++ : 'El numero de descriptores de fichero usados por el Minishell'
++ : 'debe mantenerse estable durante toda la ejecuci=C3=B3n del mismo.'
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben cerrar los que NO se vayan a usar.   =C2=
+=BB=C2=BB=C2=BB'
++ :
+=2E/freefds+ Sincronizar
+
+1019
+
+msh> ./freefds
+1019
+
+msh> ./freefds .ddf
+
+msh> cat .ddf
+1019
+
+msh> ./freefds
+1019
+
+msh> ./freefds
+1019
+
+msh> ./freefds .aux
+
+msh> cat .aux
+1019
+
+msh> cmp .ddf .aux
+
+msh> /bin/kill -KILL 3648095
++ cmp -s .ddf .aux
+
+msh> + : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D10
++ :
++ Redireccion_de_salida_a_fichero_nuevo __________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe crear el fichero.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+last -n 10 c200172 > .aux
+cat .aux
+cat: write error: Bad file descriptor
+/bin/kill -KILL 3648108
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ Redireccion_de_salida_a_fichero_existente ______________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe truncar el fichero.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .void
+cat .void > .aux
+cmp .void .aux
+/bin/kill -KILL 3648113
++ cmp -s .void .aux
++ : 'Cierto. Bien.'
++ rm -f .aux .void
++ :
++ Redireccion_de_entrada_a_fichero_no_existente __________________________
++ :
++ : 'El Minishell debe tolerar los errores cometidos por el usuario:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe detectar, notificar y tolerar el error.  =
+    =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   Se debe abortar la ejecuci=C3=B3n del resto de la=
+ linea.  =C2=BB=C2=BB=C2=BB'
++ :
+touch .aux
++ Sincronizar
+rm -f .aux2
+rm -f .noexiste
+ls -l .aux .aux2 .noexiste
+ls: cannot access '.aux2': No such file or directory
+ls: cannot access '.noexiste': No such file or directory
+ls: write error: Bad file descriptor
+: NO deber=C3=ADa borrarse el fichero ".aux".
+: Deber=C3=ADa crearse el fichero ".aux2".
+rm -f .aux < .noexiste
+=1B[31mNo se pudo redirigir: No such file or directory
+=1B[0m=1B[31mError al redirigir la entrada estandar en hijo: No such file o=
+r directory
+=1B[0mtouch .aux2
+ls -l .aux .aux2 .noexiste
+ls: cannot access '.noexiste': No such file or directory
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648120
++ '[' -f .aux2 ']'
++ : 'Cierto. Bien.'
++ rm -f .aux2
++ :
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ Redireccion_de_entrada_a_fichero_existente _____________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe abrir para lectura.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .aux
+echo rm .aux > .doit
+sh < .doit
+: Deber=C3=ADa borrarse el fichero ".aux".
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648133
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ rm -f .doit
++ :
++ LEVEL=3D15
++ :
++ Redireccion_de_entrada_y_salida_simultaneamente ________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben poder hacer simult=C3=A1neamente.   =C2=
+=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+env > .env
+cat < .env > .aux
+cmp .env .aux
+/bin/kill -KILL 3648142
++ cmp -s .env .aux
++ : 'Cierto. Bien.'
++ rm -f .aux .env
++ :
++ Descriptores_de_fichero_tras_redirecciones _____________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben cerrar los que NO se usen.   =C2=BB=C2=
+=BB=C2=BB'
++ :
++ Sincronizar
+=2E/freefds
+=2E/freefds
+=2E/freefds .aux
+cat .aux
+cat: write error: Bad file descriptor
+cmp .ddf .aux
+/bin/kill -KILL 3648149
++ cmp -s .ddf .aux
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D20
++ :
++ Secuencia_sin_redirecciones_I __________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe esperar por el =C3=BAltimo mandato.   =C2=
+=BB=C2=BB=C2=BB'
++ :
++ cron_ON
++ CLOCK=3D75837
++ Sincronizar
+sleep 10 | sleep 10 | sleep 0
+=1B[33mUsing pipe @ process sleep -> : 3648161
+=1B[0m=1B[33mUsing pipe @ process sleep -> : 3648162
+=1B[0m/bin/kill -KILL 3648160
+++ cron_OFF
++ '[' 0 -lt 9 ']'
++ : 'Cierto. Bien.'
++ :
++ Secuencia_sin_redirecciones_II _________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe conectar salida con entrada del siguiente=
+=2E   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .aux
+ls -l .aux
+ls: write error: Bad file descriptor
+echo rm .aux | cat | cat | sh
+=1B[33mUsing pipe @ process echo -> : 3648173
+=1B[0m=1B[33mUsing pipe @ process cat -> : 3648174
+=1B[0m=1B[33mUsing pipe @ process cat -> : 3648175
+=1B[0m: Deber=C3=ADa borrarse el fichero ".aux".
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648171
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ :
++ Descriptores_de_fichero_tras_secuencias_I ______________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben cerrar los que NO se usen.   =C2=BB=C2=
+=BB=C2=BB'
++ :
++ Sincronizar
+=2E/freefds
+=2E/freefds
+=2E/freefds .aux
+cat .aux
+cat: write error: Bad file descriptor
+cmp .ddf .aux
+/bin/kill -KILL 3648182
++ cmp -s .ddf .aux
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D25
++ :
++ Secuencia_con_redireccion_de_salida ____________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe redirigir la salida del =C3=BAltimo manda=
+to.   =C2=BB=C2=BB=C2=BB'
++ :
+rm .ls1
++ Sincronizar
+rm: cannot remove '.ls1': No such file or directory
+ls -1 / > .ls1
+sort .ls1 > .aux
+rev .aux > .ls1
+: El resultado de la anterior secuencia de mandatos y
+: del secuencia siguiente, ha de ser el mismo.
+ls -1 / | sort | rev > .aux
+=1B[33mUsing pipe @ process ls -> : 3648197
+=1B[0m=1B[33mUsing pipe @ process sort -> : 3648198
+=1B[0mls -l .aux .ls1
+ls: write error: Bad file descriptor
+cmp .aux .ls1
+/bin/kill -KILL 3648191
++ cmp -s .aux .ls1
++ : 'Cierto. Bien.'
++ rm -f .aux .ls1
++ :
++ Secuencia_con_redireccion_de_entrada ___________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe redirigir la entrada del primer mandato. =
+  =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+echo rm .aux > .aux
+rev .aux > .rm
+rev | cat | cat | sh < .rm
+=1B[33mUsing pipe @ process rev -> : 3648208
+=1B[0m=1B[33mUsing pipe @ process cat -> : 3648209
+=1B[0m=1B[33mUsing pipe @ process cat -> : 3648210
+=1B[0m: Deber=C3=ADa borrarse el fichero ".aux".
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648206
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ rm -f .rm
++ :
++ Secuencia_con_redireccion_de_entrada_y_salida __________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe redirigir la entrada del primer   =C2=BB=
+=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   mandato y la salida del =C3=BAltimo.           =
+=C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+echo rm .aux ; echo Fue bien > .aux
+rev .aux > .rm
+cat | rev | cat | sh < .rm > .out
+=1B[33mUsing pipe @ process cat -> : 3648220
+=1B[0m=1B[33mUsing pipe @ process rev -> : 3648221
+=1B[0m=1B[33mUsing pipe @ process cat -> : 3648222
+=1B[0m: Deber=C3=ADa borrarse el fichero ".aux".
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648218
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ rm -f .rm
++ :
+: Deber=C3=ADa crearse el fichero + Sincronizar
+".out" con el texto "Fue bien".
+cat .out
+cat: write error: Bad file descriptor
+/bin/kill -KILL 3648230
++ cmp -s .out .out2
++ : 'Cierto. Bien.'
++ rm -f .out .out2
++ :
++ Descriptores_de_fichero_tras_secuencias_II _____________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben cerrar los que NO se usen.   =C2=BB=C2=
+=BB=C2=BB'
++ :
++ Sincronizar
+=2E/freefds
+=2E/freefds
+=2E/freefds .aux
+cat .aux
+cat: write error: Bad file descriptor
+cmp .ddf .aux
+/bin/kill -KILL 3648236
++ cmp -s .ddf .aux
++ : 'Cierto. Bien.'
++ rm -f .aux
++ rm -f .ddf
++ :
++ LEVEL=3D30
++ :
++ Mandatos_en_Background_I _______________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se deben ejecutar correctamente.   =C2=BB=C2=BB=
+=C2=BB'
++ :
++ Sincronizar
+touch .aux
+ls -l .aux
+ls: write error: Bad file descriptor
+rm -f .aux &
+rm -f .aux &
+rm -f .aux &
+
+/bin/kill -KILL 3648246
+: Deber=C3=ADa borrarse el fichero ".aux".
++ Sincronizar
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648253
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ :
++ Mandatos_en_Background_II ______________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   No se debe esperar por ellos.   =C2=BB=C2=BB=C2=
+=BB'
++ :
++ cron_ON
++ CLOCK=3D75837
++ Sincronizar
+sleep 10 &
+sleep 10 &
+sleep 10 &
+/bin/kill -KILL 3648260
+++ cron_OFF
++ '[' 0 -lt 5 ']'
++ : 'Cierto. Bien.'
++ :
++ Mandatos_en_Background_III _____________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Se debe esperar por el mandato en foreground.   =
+=C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .aux
+ls -l .aux
+ls: write error: Bad file descriptor
+sleep 0 &
+sleep 0 &
+sleep 0 &
+echo sleep 1; rm -f .aux | sh
+=1B[33mUsing pipe @ process echo -> : 3648275
+=1B[0mls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648270
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ :
++ LEVEL=3D35
++ :
++ Senyales_I _____________________________________________________________
++ :
++ :
++ : 'El Minishell ha de manejar correctamente las se=C3=B1ales generables'
++ : 'desde teclado que son SIGINT y SIGQUIT.'
++ :
++ : '=C2=AB=C2=AB=C2=AB   Deben ser ignoradas o capturadas por el Minishell=
+=2E   =C2=BB=C2=BB=C2=BB'
++ :
++ : 'Se arranca otro Minishell con el siguiente PID:'
++ PID=3D3648283
++ ./sigdfl ./msh
++ Sincronizar
+ __   __ ___ __    _ ___ _______ __   __ /bin/kill_______  ___-KILL      __=
+_3648284      =20
+_______ __   __   _______ ___    __   __ _______ ______   _______=20
+=1B[31m'__' exited, status(-1): No such file or directory
+=1B[0m|syntax error
+  |_|  |   |  |  | |   |       |  | |  |       |   |   |   |     |  _    | =
+ | |  | |   _   |   |  |  | |  |   _   |    _ | |       |
+|syntax error
+       |   |   |_| |   |  _____|  |_|  |    ___|   |   |   |     | |_|   | =
+ |_|  | |  |_|  |   |  |  |_|  |  |_|  |   | || |   _   |
+|syntax error
+       |   |       |   | |_____|       |   |___|   |   |   |     |       | =
+      | |       |   |  |       |       |   |_||_|  | |  |
+|syntax error
+       |   |  _    |   |_____  |       |    ___|   |___|   |___  |  _   ||_=
+     _| |       |   |__|       |       |    __  |  |_|  |
+|syntax error
+ ||_|| |   | | |   |   |_____| |   _   |   |___|       |       | | |_|   | =
+|   |   |   _   |       |     ||   _   + : 'Se intenta matar con las se=C3=
+=B1ales INT, QUIT y KILL en ese orden.'
+|   |  | |       |
+|syntax error
+_|   |_|___|_|  |__|___|_______|__| |__|_______|_______|_______| |_______| =
+|___|   |__| |__|_______||___| |__| |__|___|  |_|_______|
+
+
+msh>=20
+syntax error
+msh>+ kill -INT 3648283
++ kill -QUIT 3648283
++ kill -KILL 3648283
++ wait 3648283
+/home/jail/home2/datsi/ssoo/soX/msh/src/check.msh-4.5.3: line 1448: 3648283=
+ Killed                  ./sigdfl $BIN < $PIPE
++ EXIT=3D137
++ case $EXIT in
++ : 137
++ : 'SIGKILL mata al Minishell, como debe ser. Bien.'
++ :
++ Senyales_II ____________________________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Deben ser ignoradas por los procesos en backgroun=
+d.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+ touch .auxsyntax error
+
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+=2E/killmyself -INT &
+=2E/killmyself -INT &
+=2E/killmyself -INT &
+
+/bin/kill -KILL 3648289
+: Deber=C3=ADa borrarse el + Sincronizar
+fichero ".aux".
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648295
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ :
++ Senyales_III ___________________________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Deben ser la acci=C3=B3n por defecto para proceso=
+s en foreground.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .aux
+ls -l .aux
+ls: write error: Bad file descriptor
+: NO deber=C3=ADa borrarse el fichero ".aux".
+=2E/killmyself -INT
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648299
++ '[' -f .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D40
++ :
++ Interno_cd_I ___________________________________________________________
++ :
++ : 'Cuando se invoca en foreground y es el =C3=BAltimo:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe ejecutar como llamada al sistema.   =C2=
+=BB=C2=BB=C2=BB'
++ :
+pwd
++ Sincronizar
+pwd: write error: Bad file descriptor
+cd ..
+cd c200172
+cd ./..
+pwd
+pwd: write error: Bad file descriptor
+pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
+cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
+cat: write error: Bad file descriptor
+cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/bin/kill -KILL 3648307
+++ cd ..
+++ pwd
+++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd
++ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13 =3D /home/jail/home2=
+/datsi/ssoo/soX/msh/home.2022b13 ']'
++ : 'Cierto. Bien.'
++ :
++ Interno_cd_II __________________________________________________________
++ :
++ : 'El mandato "cd" siempre:'
++ : '=C2=AB=C2=AB=C2=AB   Debe mostrar el "current working directory"   =C2=
+=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   por la salida est=C3=A1ndar con formato "%s\n".  =
+  =C2=BB=C2=BB=C2=BB'
++ :
+cd ..
++ Sincronizar
+cd . > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cat: write error: Bad file descriptor
+cmp /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /home/jai=
+l/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
+cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/bin/kill -KILL 3648315
++ cmp -s /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.pwd /hom=
+e/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.cd
++ : 'Cierto. Bien.'
++ rm -f .pwd .cd
++ :
++ Interno_cd_III _________________________________________________________
++ :
++ : 'Cuando se invoca "cd" sin argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   Debe cambiar al directorio HOME.   =C2=BB=C2=BB=
+=C2=BB'
++ :
+cd+ Sincronizar
+ ..
+cd
+pwd > /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
+cat: write error: Bad file descriptor
+cd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/bin/kill -KILL 3648321
+++ cat /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.home
++ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 =3D /home/ja=
+il/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 ']'
++ : 'Cierto. Bien.'
++ rm -f .home
++ :
++ Interno_cd_IV __________________________________________________________
++ :
++ : 'Si se intenta cambiar a un directorio no existente:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el error.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+cd ...
+=1B[31mCan't access directory: No such file or directory
+=1B[0m/bin/kill -KILL 3648327
++ :
++ : 'Si se invoca con demasiados argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el error.   =C2=BB=C2=BB=C2=BB'
++ :
+cd+ Sincronizar
+ a b
+=1B[31mCant have more than 1 argument for 'CD': Bad file descriptor
+=1B[0mcd /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+/bin/kill -KILL 3648329
++ :
++ LEVEL=3D45
++ :
++ Interno_umask_I ________________________________________________________
++ :
++ : 'Cuando se invoca "umask" sin argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe mostrar la mascara de creaci=C3=B3n de fi=
+cheros,   =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   por la salida est=C3=A1ndar con formato "%o\n".  =
+          =C2=BB=C2=BB=C2=BB'
++ :
+umask+ Sincronizar
+
+umask > .aux
+cat .aux
+cat: write error: Bad file descriptor
+/bin/kill -KILL 3648331
+++ cat .aux
++ '[' 0 -eq 0 ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ Interno_umask_II _______________________________________________________
++ :
++ : 'Cuando se invoca "umask" sin argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   No se debe modificar el valor actual de la mascar=
+a.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+umask > .aux
+: Deber=C3=ADa crearse con permisos "rw-rw-rw-"
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648336
+++ ls -l .aux
+++ cut -c-10
++ '[' -rw-rw-rw- =3D -rw-rw-rw- ']'
++ : 'Cierto. Bien.'
++ :
+chmod+ Sincronizar
+ +x .aux
+: Deber=C3=ADa cambiarse a permisos "rwxrwxrwx"
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648344
+++ ls -l .aux
+++ cut -c-10
++ '[' -rwxrwxrwx =3D -rwxrwxrwx ']'
++ : 'Cierto. Bien.'
++ :
++ Interno_umask_III ______________________________________________________
++ :
++ : 'Cuando se invoca "umask" con un argumento:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe modificar el valor actual de la mascara  =
+    =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   con el valor del argumento interpretado en base 8=
+=2E   =C2=BB=C2=BB=C2=BB'
++ :
+chmod 0 .aux
++ Sincronizar
+: Deber=C3=ADa cambiarse a permisos "---------"
+ls -l .aux
+ls: write error: Bad file descriptor
+umask 026
+chmod +rwx .aux
+: Deber=C3=ADa cambiarse a permisos "rwxr-x--x"
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648352
+++ ls -l .aux
+++ cut -c-10
++ '[' -rwxr-x--x =3D -rwxr-x--x ']'
++ : 'Cierto. Bien.'
++ :
++ Interno_umask_IV _______________________________________________________
++ :
++ : 'Cuando se invoca "umask" con un argumento err=C3=B3neo:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el error.                      =
+     =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   No se debe modificar el valor actual de la mascar=
+a.   =C2=BB=C2=BB=C2=BB'
++ :
+chmod+ Sincronizar
+ 0 .aux
+: Deber=C3=ADa cambiarse a permisos "---------"
+ls -l .aux
+ls: write error: Bad file descriptor
+umask 888
+=1B[31m888Please imput a valid Base-8 number: Bad file descriptor
+=1B[0mchmod +rwx .aux
+: Deber=C3=ADa cambiarse a permisos "rwxr-x--x"
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648363
+++ ls -l .aux
+++ cut -c-10
++ '[' -rwxr-x--x =3D -rwxr-x--x ']'
++ : 'Cierto. Bien.'
++ :
++ Interno_umask_V ________________________________________________________
++ :
++ : 'Cuando se invoca "umask" con un numero de argumentos err=C3=B3neo:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el error.                      =
+     =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   No se debe modificar el valor actual de la mascar=
+a.   =C2=BB=C2=BB=C2=BB'
++ :
+chmod+ Sincronizar
+ 0 .aux
+: Deber=C3=ADa cambiarse a permisos "---------"
+ls -l .aux
+ls: write error: Bad file descriptor
+umask 115 0
+=1B[31mCant have more than 1 argument for 'Umask': Bad file descriptor
+=1B[0mchmod +rwx .aux
+: Deber=C3=ADa cambiarse a permisos "rwxr-x--x"
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648374
+++ ls -l .aux
+++ cut -c-10
++ '[' -rwxr-x--x =3D -rwxr-x--x ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D50
++ :
++ case "$TURN" in
++ Interno_time_I _________________________________________________________
++ :
++ : '=C2=AB=C2=AB=C2=AB   Debe poderse redirigir la salida est=C3=A1ndar   =
+  =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   de todo mandato interno. Tambi=C3=A9n de "time". =
+  =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+time sleep 0 > .aux
+ls -l .aux
+ls: write error: Bad file descriptor
+/bin/kill -KILL 3648385
++ '[' -s .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ LEVEL=3D55
++ :
++ Interno_time_II ________________________________________________________
++ :
++ : 'Cuando se invoca "time" sin argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el tiempo consumido.   =C2=BB=
+=C2=BB=C2=BB'
++ :
++ Sincronizar
+time
+time > .aux
+cat .aux
+cat: write error: Bad file descriptor
+/bin/kill -KILL 3648390
++ '[' -s .aux ']'
++ : 'Cierto. Bien.'
++ rm -f .aux
++ :
++ Interno_time_III _______________________________________________________
++ :
++ : 'Cuando se invoca "time" con argumentos:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe ejecutar el mandato indicado.            =
+        =C2=BB=C2=BB=C2=BB'
++ : '=C2=AB=C2=AB=C2=AB   Se debe notificar el tiempo consumido en su ejecu=
+ci=C3=B3n.   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+touch .aux
+time rm -f .aux
+ls -l .aux
+ls: cannot access '.aux': No such file or directory
+/bin/kill -KILL 3648394
++ '[' -f .aux ']'
++ : 'Falso. Bien.'
++ :
++ LEVEL=3D60
++ :
++ Metacaracter_Dolar_I ___________________________________________________
++ :
++ : 'El metacar=C3=A1cter "$" con argumento "HOME" :'
++ : '=C2=AB=C2=AB=C2=AB   Se debe sustituir por el valor de la variable "HO=
+ME".   =C2=BB=C2=BB=C2=BB'
++ :
++ Sincronizar
+: HOME=3D/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
+echo $HOME
+echo: write error: Bad file descriptor
+echo $HOME > .aux
+/bin/kill -KILL 3648399
++ cmp -s .aux .home
++ : 'Cierto. Bien.'
++ rm -f .aux .home
++ :
++ Metacaracter_Dolar_II __________________________________________________
++ :
++ : 'Donde aparezca el metacar=C3=A1cter "$" con argumento:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe sustituir correctamente la variable por s=
+u valor.   =C2=BB=C2=BB=C2=BB'
++ :
++ echo /../home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172/.
+echo /..$HOME/. > .aux
++ Sincronizar
+cat .aux
+cat: write error: Bad file descriptor
+/bin/kill -KILL 3648408
++ cmp .aux .aux2
++ : 'Cierto. Bien.'
++ rm -f .aux .aux2
++ :
++ LEVEL=3D65
++ :
++ Metacaracter_Tilde _____________________________________________________
++ :
++ : 'El metacar=C3=A1cter "~" sin argumento:'
++ : '=C2=AB=C2=AB=C2=AB   Se debe sustituir por el valor de la variable "HO=
+ME".   =C2=BB=C2=BB=C2=BB'
++ :
+: + Sincronizar
+HOME=3D/home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172
+echo /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 > .home
+echo ~
++ TIMEOUT
++ : '########## ATENCI=C3=93N ##########'
++ : 'Posible bloqueo (1) del Minishell.'
++ :
+++ cat .home
+++ cat .aux
+cat: .aux: No such file or directory
++ '[' /home/jail/home2/datsi/ssoo/soX/msh/home.2022b13/c200172 =3D '' ']'
++ : Falso.
++ ERROR_GRAVE
++ NOTA=3D65
++ : '########## ATENCI=C3=93N ##########'
++ :
++ : 'El metacar=C3=A1cter "~" NO se sustituye correctamente.'
++ rm -f .aux .home
++ :
++ Interno_cd_HOME ________________________________________________________
++ :
++ : 'El mandato "cd ." :'
++ : '=C2=AB=C2=AB=C2=AB   Debe mostrar el valor de la variable "HOME".   =
+=C2=BB=C2=BB=C2=BB'
++ :
+++ BROKEN_PIPE
+++ : '########## ATENCI=C3=93N ##########'
+++ : 'Terminaci=C3=B3n an=C3=B3mala del Minishell.'
+++ :
+++ : 'S=C3=B3lo debe terminar al llegar al EOF de su entrada est=C3=A1ndar.'
+++ : 'No deben producirse se=C3=B1ales como SIGBUS o SIGSEGV que le maten.'
+++ : 'No debe hacer EXIT ante errores provocados por el usuario.'
+++ :
+++ exit 65
++ case $NOTA in
++ : 65
++ : '*** ATENCI=C3=93N ***'
++ : 'Para APROBAR LA PARTE PRACTICA de la asignatura       '
++ : 'es IMPRESCINDIBLE obtener como m=C3=ADnimo 4.5 puntos.     '
++ : 'Debe usted llegar a una media de 4.5 entre esta       '
++ : 'pr=C3=A1ctica y las dem=C3=A1s (si las hubiera).                '
++ :
++ exit 65
